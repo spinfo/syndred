@@ -1,1 +1,1 @@
-# Syndred - A Syntax-Driven Editor for Lexical Ressources
+# Syndred - A Syntax-Driven Editor for Lexical Resources
