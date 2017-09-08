@@ -1,0 +1,4 @@
+lexikon = entry.
+entry = qs":"zs".".
+qs = "[a-zA-Z]+".
+zs = "singe"|"monkey".

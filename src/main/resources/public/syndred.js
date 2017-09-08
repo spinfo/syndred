@@ -30,23 +30,23 @@ class Syndred extends React.Component {
 
 	handleSubmit() {
 		const {editorState} = this.state;
+		let selection = editorState.getSelection();
+
 		if (this.submitCounter) window.clearTimeout(this.submitCounter);
 		$('.public-DraftEditor-content').prop('contenteditable', 'false');
 
 		$.ajax({
-			async: true,
-			url: '/edit',
-			type: 'POST',
-			dataType : 'json',
+			async: true, url: '/edit', type: 'POST', dataType : 'json',
 			data: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
 			contentType : 'application/json; charset=utf-8',
 		}).done(jQuery.proxy(function(raw) {
 			let data = convertFromRaw(raw);
-			let news = EditorState.push(editorState, data, 'spellcheck-change');
-			this.onChange(EditorState.moveFocusToEnd(news));
+			let edit = EditorState.push(editorState, data, 'spellcheck-change');
+
+			$('.public-DraftEditor-content').prop('contenteditable', 'true');
+			this.onChange(EditorState.forceSelection(edit, selection));
     }, this));
 
-		$('.public-DraftEditor-content').prop('contenteditable', 'true');
 	}
 
 	handleKey(command) {
@@ -88,19 +88,14 @@ class Syndred extends React.Component {
 
 		return (
 			<div className="syndred-root">
-				<BlockStyleControls
-					editorState={editorState}
-					onToggle={this.toggleBlockType}
-				/>
 				<InlineStyleControls
 					editorState={editorState}
 					onToggle={this.toggleInlineStyle}
 				/>
 				<div className={className} onClick={this.focus}>
 					<Editor
-						readOnly={this.state.readOnly}
 						blockStyleFn={getBlockStyle}
-						customStyleMap={styleMap}
+						blockRenderMap={blockRenderMap}
 						editorState={editorState}
 						handleKeyCommand={this.handleKeyCommand}
 						onChange={this.onChange}
@@ -114,22 +109,45 @@ class Syndred extends React.Component {
 	}
 }
 
-// Custom overrides for "code" style.
-const styleMap = {
-	CODE: {
-		backgroundColor: 'rgba(0, 0, 0, 0.05)',
-		fontFamily: '"Inconsolata", "Menlo", "Consolas", monospace',
-		fontSize: 16,
-		padding: 2,
+const parsedRenderMap = Immutable.Map({
+	'parsed': {
+		element: 'div',
 	},
-};
+});
 
-function getBlockStyle(block) {
+const blockRenderMap = Draft.DefaultDraftBlockRenderMap.merge(parsedRenderMap);
+
+const getBlockStyle = (block) => {
 	switch (block.getType()) {
 		case 'blockquote': return 'syndred-blockquote';
+		case 'parsed': return 'syndred-parsed';
 		default: return null;
 	}
 }
+
+var INLINE_STYLES = [
+	{label: 'Bold', style: 'BOLD'},
+	{label: 'Italic', style: 'ITALIC'},
+	{label: 'Underline', style: 'UNDERLINE'},
+	{label: 'Monospace', style: 'CODE'},
+];
+
+const InlineStyleControls = (props) => {
+	var currentStyle = props.editorState.getCurrentInlineStyle();
+	return (
+		<div className="syndred-controls">
+		{INLINE_STYLES.map(type =>
+			<StyleButton
+				key={type.label}
+				active={currentStyle.has(type.style)}
+				label={type.label}
+				onToggle={props.onToggle}
+				style={type.style}
+			/>
+		)}
+		</div>
+	);
+};
 
 class StyleButton extends React.Component {
 	constructor() {
@@ -153,66 +171,5 @@ class StyleButton extends React.Component {
 		);
 	}
 }
-
-const BLOCK_TYPES = [
-	{label: 'H1', style: 'header-one'},
-	{label: 'H2', style: 'header-two'},
-	{label: 'H3', style: 'header-three'},
-	{label: 'H4', style: 'header-four'},
-	{label: 'H5', style: 'header-five'},
-	{label: 'H6', style: 'header-six'},
-	{label: 'Blockquote', style: 'blockquote'},
-	{label: 'UL', style: 'unordered-list-item'},
-	{label: 'OL', style: 'ordered-list-item'},
-	{label: 'Code Block', style: 'code-block'},
-];
-
-const BlockStyleControls = (props) => {
-	const {editorState} = props;
-	const selection = editorState.getSelection();
-	const blockType = editorState
-	.getCurrentContent()
-	.getBlockForKey(selection.getStartKey())
-	.getType();
-
-	return (
-		<div className="syndred-controls">
-		{BLOCK_TYPES.map((type) =>
-			<StyleButton
-			key={type.label}
-			active={type.style === blockType}
-			label={type.label}
-			onToggle={props.onToggle}
-			style={type.style}
-			/>
-		)}
-		</div>
-	);
-};
-
-var INLINE_STYLES = [
-	{label: 'Bold', style: 'BOLD'},
-	{label: 'Italic', style: 'ITALIC'},
-	{label: 'Underline', style: 'UNDERLINE'},
-	{label: 'Monospace', style: 'CODE'},
-	{label: 'Parsed', style: 'PARSED'},
-];
-
-const InlineStyleControls = (props) => {
-	var currentStyle = props.editorState.getCurrentInlineStyle();
-	return (
-		<div className="syndred-controls">
-		{INLINE_STYLES.map(type =>
-			<StyleButton
-				key={type.label}
-				active={currentStyle.has(type.style)}
-				label={type.label}
-				onToggle={props.onToggle}
-				style={type.style}
-			/>
-		)}
-		</div>
-	);
-};
 
 ReactDOM.render(<Syndred />, document.getElementById('syndred'));
