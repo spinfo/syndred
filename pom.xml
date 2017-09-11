@@ -61,15 +61,31 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/classes/CP</outputDirectory>
+							<resources>
+								<resource>
+									<directory>bin/CP</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
 		<resources>
-			<resource>
-				<directory>bin/CP</directory>
-				<includes>
-					<include>**/*.class</include>
-				</includes>
-				<targetPath>CP</targetPath>
-			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
