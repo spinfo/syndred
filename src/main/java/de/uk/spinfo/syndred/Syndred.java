@@ -9,4 +9,5 @@ public class Syndred {
 	public static void main(String[] args) {
 		SpringApplication.run(Syndred.class, args);
 	}
+
 }
