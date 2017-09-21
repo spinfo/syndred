@@ -1,7 +1,7 @@
 package texts;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 
 public class Texts {
 
@@ -55,9 +55,10 @@ public class Texts {
 
 	public void open(String fileName) {
 		eot = false;
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
 		try {
-			reader = new BufferedReader(new FileReader(fileName));
+			reader = new BufferedReader(new InputStreamReader(cl.getResourceAsStream(fileName)));
 		} catch (Exception e) {
 		}
 	}

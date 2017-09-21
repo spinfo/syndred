@@ -60,6 +60,9 @@ public class TexteditorController {
 		if (s1.equals(s2))
 			return block;
 
+		System.out.println(existing.getKey() + "==" + block.getKey());
+		System.out.println(s1 + "!=" + s2);
+
 		length = 0;
 		RichChar rch = new RichChar();
 		List<Block> known = new ArrayList<Block>();
@@ -87,14 +90,20 @@ public class TexteditorController {
 		int i = 0;
 		RichChar rch = new RichChar();
 		char[] text = block.getText().toCharArray();
-
+		parser.parsed = false;
+		
 		while (i < text.length && (rch.ch = text[i++]) != '0') {
 			parser.shared.setCharFromJson(rch);
+			System.out.println("---------------------------------> " + parser.parsed);
+			System.out.println("+++++++++++++++++++++++++++++++++> " + parser.shared.available);
 		}
 
-		if (i == text.length && i > 0)
+		if (i == text.length && i > 0 && parser.parsed)
 			block.setType("parsed");
 
+		System.out.println("---------------------------------> " + parser.parsed);
+		System.out.println("+++++++++++++++++++++++++++++++++> " + parser.shared.available);
+		
 		length += i;
 		return block;
 	}
