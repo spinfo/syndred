@@ -1,5 +1,5 @@
 
-package de.uk.spinfo.syndred.draftjs;
+package syndred.draftjs;
 
 import java.io.Serializable;
 
@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
 
 })
-public class Data implements Serializable {
+public class EntityMap implements Serializable {
 
-	private final static long serialVersionUID = 173633736370913411L;
+	private final static long serialVersionUID = 6891740932845430562L;
 
 }

@@ -1,2 +1,6 @@
-/target/
-/src/main/cp/**/*.lst
+.metadata
+.settings
+
+frontend/target/
+
+parser/src/**/*.lst

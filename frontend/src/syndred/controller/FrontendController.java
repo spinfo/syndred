@@ -1,4 +1,4 @@
-package de.uk.spinfo.syndred.controller;
+package syndred.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

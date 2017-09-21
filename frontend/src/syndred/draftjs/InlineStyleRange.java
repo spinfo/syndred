@@ -1,5 +1,5 @@
 
-package de.uk.spinfo.syndred.draftjs;
+package syndred.draftjs;
 
 import java.io.Serializable;
 

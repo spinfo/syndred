@@ -1,4 +1,4 @@
-package de.uk.spinfo.syndred.controller;
+package syndred.controller;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import de.uk.spinfo.syndred.Parser;
-import de.uk.spinfo.syndred.draftjs.Block;
-import de.uk.spinfo.syndred.draftjs.RawDraftContentState;
+import syndred.Parser;
+import syndred.draftjs.Block;
+import syndred.draftjs.RawDraftContentState;
 import texts.RichChar;
 
 @Controller
@@ -59,21 +59,21 @@ public class TexteditorController {
 
 		if (s1.equals(s2))
 			return block;
-		
+
 		length = 0;
 		RichChar rch = new RichChar();
 		List<Block> known = new ArrayList<Block>();
-		
+
 		for (Block b : blocks) {
 			if (b.getKey().equals(existing.getKey()))
 				break;
-			
+
 			known.add(b);
 			length += b.getText().length();
 		}
 
 		System.out.println(":::BACKTRACK(" + length + ")");
-		
+
 		rch.ch = '$';
 		blocks = known;
 		parser.shared.getSharedText().setTextPos(length);

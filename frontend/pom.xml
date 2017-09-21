@@ -15,7 +15,7 @@
 	<description>A Syntax-Driven Editor for Lexical Resources</description>
 
 	<properties>
-		<start-class>de.uk.spinfo.syndred.Syndred</start-class>
+		<start-class>syndred.Syndred</start-class>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -68,7 +68,7 @@
 				<executions>
 					<execution>
 						<id>copy-resources</id>
-						<phase>validate</phase>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
@@ -76,7 +76,7 @@
 							<outputDirectory>${basedir}/target/classes/CP</outputDirectory>
 							<resources>
 								<resource>
-									<directory>bin/CP</directory>
+									<directory>../parser/bin/CP</directory>
 								</resource>
 							</resources>
 						</configuration>
@@ -87,7 +87,7 @@
 
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>res</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>

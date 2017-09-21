@@ -1,4 +1,4 @@
-package de.uk.spinfo.syndred;
+package syndred;
 
 import CP.Ebnf.Ebnf;
 import texts.Shared;
