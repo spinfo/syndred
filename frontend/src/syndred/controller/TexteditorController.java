@@ -45,12 +45,15 @@ public class TexteditorController {
 	}
 
 	private Block parseBlock(Block block) {
-		return (blocks.stream().anyMatch(i -> i.getKey().equals(block.getKey()))) ? parseExistingBlock(block)
-				: parseUnknownBlock(block);
+		if (blocks.stream().anyMatch(i -> i.getKey().equals(block.getKey()))) {
+			return parseExistingBlock(block);
+		} else {
+			return parseUnknownBlock(block);
+		}
 	}
 
 	private Block parseExistingBlock(Block block) {
-		System.out.println(":::parseExistingBlock(" + block.getText() + ")");
+		System.out.println("====================> parseExistingBlock(" + block.getText() + ")");
 		Optional<Block> first = blocks.stream().filter(i -> i.getKey().equals(block.getKey())).findFirst();
 		Block existing = first.get();
 
@@ -60,9 +63,11 @@ public class TexteditorController {
 		if (s1.equals(s2))
 			return block;
 
-		System.out.println(existing.getKey() + "==" + block.getKey());
-		System.out.println(s1 + "!=" + s2);
+		if (s1.isEmpty() && !s2.isEmpty())
+			return parseUnknownBlock(block);
 
+		block.setType(null);
+		
 		length = 0;
 		RichChar rch = new RichChar();
 		List<Block> known = new ArrayList<Block>();
@@ -75,7 +80,7 @@ public class TexteditorController {
 			length += b.getText().length();
 		}
 
-		System.out.println(":::BACKTRACK(" + length + ")");
+		System.out.println("====================> BACKTRACK(" + length + ")");
 
 		rch.ch = '$';
 		blocks = known;
@@ -86,24 +91,24 @@ public class TexteditorController {
 	}
 
 	private Block parseUnknownBlock(Block block) {
-		System.out.println(":::parseUnknownBlock(" + block.getText() + ")");
+		System.out.println("====================> parseUnknownBlock(" + block.getText() + ")");
 		int i = 0;
 		RichChar rch = new RichChar();
 		char[] text = block.getText().toCharArray();
 		parser.parsed = false;
-		
+
 		while (i < text.length && (rch.ch = text[i++]) != '0') {
 			parser.shared.setCharFromJson(rch);
-			System.out.println("---------------------------------> " + parser.parsed);
-			System.out.println("+++++++++++++++++++++++++++++++++> " + parser.shared.available);
+			try {
+				while (parser.shared.available)
+					Thread.sleep(100);
+			} catch (Exception e) {
+			}
 		}
 
 		if (i == text.length && i > 0 && parser.parsed)
 			block.setType("parsed");
 
-		System.out.println("---------------------------------> " + parser.parsed);
-		System.out.println("+++++++++++++++++++++++++++++++++> " + parser.shared.available);
-		
 		length += i;
 		return block;
 	}
