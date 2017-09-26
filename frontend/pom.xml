@@ -91,6 +91,7 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
+		<sourceDirectory>src</sourceDirectory>
 	</build>
 
 </project>
