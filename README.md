@@ -37,13 +37,3 @@ Um die Paketierung mittels Maven anzustoßen muss sichergestellt werden, dass di
 
 Wurde die Applikation korrekt gestartet, so ist das DraftJS-Webinterface auf Port 8080 des ausführenden Gerätes anzutreffen und in der Java-Konsole werden die Vorgänge des Parser ausgegeben.
 
-
-## Projektmitarbeiter
-
-**Prof Dr. Jürgen Rolshoven** <rols@spinfo.uni-koeln.de>
-
-Francisco Mondaca <f.mondaca@uni-koeln.de>
-
-Philip Schildkamp <philip.schildkamp@uni-koeln.de>
-
-Andreas Vogt <avogt7@uni-koeln.de>
