@@ -2,7 +2,106 @@
 
 const {convertFromRaw, convertToRaw, Editor, EditorState, RichUtils} = Draft;
 
-class Syndred extends React.Component {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const parsedRenderMap = Immutable.Map({
+	'parsed': {
+		element: 'div',
+	},
+});
+
+const blockRenderMap = Draft.DefaultDraftBlockRenderMap.merge(parsedRenderMap);
+
+const getBlockStyle = (block) => {
+	switch (block.getType()) {
+		case 'blockquote': return 'syndred-blockquote';
+		case 'parsed': return 'syndred-parsed';
+		default: return null;
+	}
+}
+
+var INLINE_STYLES = [
+	{label: 'Bold', style: 'BOLD'},
+	{label: 'Italic', style: 'ITALIC'},
+	{label: 'Underline', style: 'UNDERLINE'},
+	{label: 'Monospace', style: 'CODE'},
+];
+
+const InlineStyleControls = (props) => {
+	var currentStyle = props.editorState.getCurrentInlineStyle();
+	return (
+		<div className="syndred-controls">
+		{INLINE_STYLES.map(type =>
+			<StyleButton
+				key={type.label}
+				active={currentStyle.has(type.style)}
+				label={type.label}
+				onToggle={props.onToggle}
+				style={type.style}
+			/>
+		)}
+		</div>
+	);
+};
+
+class StyleButton extends React.Component {
+	constructor() {
+		super();
+		this.onToggle = (e) => {
+			e.preventDefault();
+			this.props.onToggle(this.props.style);
+		};
+	}
+
+	render() {
+		let className = 'syndred-styleButton';
+		if (this.props.active) {
+			className += ' syndred-activeButton';
+		}
+
+		return (
+			<span className={className} onMouseDown={this.onToggle}>
+			{this.props.label}
+			</span>
+		);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class EditorComponent extends React.Component {
 
 	submitCounter = null;
 
@@ -87,7 +186,7 @@ class Syndred extends React.Component {
 		let className = 'syndred-editor';
 
 		return (
-			<div className="syndred-root">
+			<div className="syndred-root well">
 				<InlineStyleControls
 					editorState={editorState}
 					onToggle={this.toggleInlineStyle}
@@ -108,68 +207,3 @@ class Syndred extends React.Component {
 		);
 	}
 }
-
-const parsedRenderMap = Immutable.Map({
-	'parsed': {
-		element: 'div',
-	},
-});
-
-const blockRenderMap = Draft.DefaultDraftBlockRenderMap.merge(parsedRenderMap);
-
-const getBlockStyle = (block) => {
-	switch (block.getType()) {
-		case 'blockquote': return 'syndred-blockquote';
-		case 'parsed': return 'syndred-parsed';
-		default: return null;
-	}
-}
-
-var INLINE_STYLES = [
-	{label: 'Bold', style: 'BOLD'},
-	{label: 'Italic', style: 'ITALIC'},
-	{label: 'Underline', style: 'UNDERLINE'},
-	{label: 'Monospace', style: 'CODE'},
-];
-
-const InlineStyleControls = (props) => {
-	var currentStyle = props.editorState.getCurrentInlineStyle();
-	return (
-		<div className="syndred-controls">
-		{INLINE_STYLES.map(type =>
-			<StyleButton
-				key={type.label}
-				active={currentStyle.has(type.style)}
-				label={type.label}
-				onToggle={props.onToggle}
-				style={type.style}
-			/>
-		)}
-		</div>
-	);
-};
-
-class StyleButton extends React.Component {
-	constructor() {
-		super();
-		this.onToggle = (e) => {
-			e.preventDefault();
-			this.props.onToggle(this.props.style);
-		};
-	}
-
-	render() {
-		let className = 'syndred-styleButton';
-		if (this.props.active) {
-			className += ' syndred-activeButton';
-		}
-
-		return (
-			<span className={className} onMouseDown={this.onToggle}>
-			{this.props.label}
-			</span>
-		);
-	}
-}
-
-ReactDOM.render(<Syndred />, document.getElementById('syndred'));
