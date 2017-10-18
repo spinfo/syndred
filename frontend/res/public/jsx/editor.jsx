@@ -10,12 +10,13 @@ class EditorComponent extends React.Component {
 				let raw = JSON.parse(message.body);
 				if (jQuery.isEmptyObject(raw)) return;
 
-				let editorState = Draft.EditorState.forceSelection(
-					Draft.EditorState.push(
-						this.state.editorState,
-						Draft.convertFromRaw(raw)
-					), this.state.editorState.getSelection()
-				);
+				let selection = this.state.editorState.getSelection();
+				let editorState = Draft.EditorState.push(
+					this.state.editorState, Draft.convertFromRaw(raw));
+
+				if (selection.getHasFocus()) editorState =
+					Draft.EditorState.forceSelection(editorState, selection);
+
 				this.setState({editorState});
 			}
 		);
