@@ -4,21 +4,20 @@ class ParserComponent extends React.Component {
 
 	state = {
 		name: 'ebnf',
-		gramma: ''
+		gramma: '',
+		error: false
 	};
 
-	// constructor(props) {
-	// 	super(props);
-	// }
+	componentWillMount() {
+		this.props.socket.subscribe('/syndred/' + location.hash + '/parser',
+			(msg) => { this.setState(JSON.parse(msg.body)); }
+		);
+	}
 
-	handleClick(event) {
+	setParser(event) {
 		event.preventDefault();
-
-		let forms = $('#parser .form-group:first-of-type');
-		let error = this.props.setParser(this.state);
-
-		if (error) forms.removeClass('has-error');
-		else forms.addClass('has-error');
+		let json = JSON.stringify(this.state);
+		this.props.socket.send('/syndred/' + location.hash + '/parser', {}, json);
 	}
 
 	render() {
@@ -26,39 +25,34 @@ class ParserComponent extends React.Component {
 			<form id="parser" className="form-horizontal well">
 				<fieldset>
 					<legend>Parser</legend>
-					<div className="form-group">
+					<div className={"form-group"+(this.state.error?" has-error":"")}>
 						<label for="parser-gramma" className="col-lg-2 control-label">
-							Gramma
-						</label>
+							Gramma</label>
 						<div className="col-lg-10">
-							<textarea disabled={!this.props.ready} className="form-control"
-								rows="5" id="parser-gramma">{this.state.gramma}
-							</textarea>
+							<textarea id="parser-gramma" className="form-control" rows="5"
+							 	onChange={()=>{this.state.gramma=$('#parser-gramma').val();}}>
+								{this.state.gramma}</textarea>
 						</div>
 					</div>
-					<div className="form-group">
-						<label for="parser-name" className="col-lg-2 control-label">Type
-						</label>
+					<div className={"form-group"+(this.state.error?" has-error":"")}>
+						<label for="parser-name" className="col-lg-2 control-label">
+							Type</label>
 						<div className="col-lg-10">
-							<select disabled={!this.props.ready}
-								className="form-control" id="parser-name">
-
+							<select id="parser-name" className="form-control"
+								onChange={()=>{this.state.name = $('#parser-name').val();}}>
 								<option selected={this.state.name === 'regex'} value="regex">
-									Regular Expressions
-								</option>
+									Regular Expressions</option>
 								<option selected={this.state.name === 'ebnf'} value="ebnf">
-									Extended Backus–Naur form (EBNF)
-								</option>
+									Extended Backus–Naur form (EBNF)</option>
 								<option selected={this.state.name === 'abnf'} value="abnf">
-									Augmented Backus–Naur form (ABNF)
-								</option>
+									Augmented Backus–Naur form (ABNF)</option>
 							</select>
 						</div>
 					</div>
 					<div className="form-group">
 						<div className="col-lg-10 col-lg-offset-2">
-							<button disabled={!this.props.ready} onClick={(e) => this.handleClick(e)}
-								type="submit" className="btn btn-primary">Apply</button>
+							<button type="submit" className="btn btn-primary"
+								onClick={(event)=>this.setParser(event)}>Apply</button>
 						</div>
 					</div>
 				</fieldset>
