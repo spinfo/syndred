@@ -40,12 +40,12 @@ class ParserComponent extends React.Component {
 						<div className="col-lg-10">
 							<select id="parser-name" className="form-control"
 								onChange={() => this.state.name = $('#parser-name').val() }>
-								<option selected={this.state.name === 'regex'} value="regex">
-									Regular Expressions</option>
-								<option selected={this.state.name === 'ebnf'} value="ebnf">
-									Extended Backus–Naur form (EBNF)</option>
 								<option selected={this.state.name === 'abnf'} value="abnf">
 									Augmented Backus–Naur form (ABNF)</option>
+								<option selected={this.state.name === 'ebnf'} value="ebnf">
+									Extended Backus–Naur form (EBNF)</option>
+								<option selected={this.state.name === 'regex'} value="regex">
+									Regular Expressions</option>
 							</select>
 						</div>
 					</div>
