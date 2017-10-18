@@ -12,12 +12,15 @@ import syndred.entities.RawDraftContentState;
 @Controller
 public class WebsocketController {
 
-	@MessageMapping("/editor/{instance}")
-	@SendTo("/editor/{instance}")
+	@SubscribeMapping("/{instance}/editor")
+	public RawDraftContentState editorInit(@DestinationVariable String instance) {
+		return new RawDraftContentState();
+	}
+	
+	@MessageMapping("/{instance}/editor")
+	@SendTo("/syndred/{instance}/editor")
 	public RawDraftContentState editor(@DestinationVariable String instance, RawDraftContentState contentState) {
-
-		System.out.println(contentState);
-
+		contentState.getBlocks().stream().forEach(i -> System.out.println(i.getText()));
 		return contentState;
 	}
 
