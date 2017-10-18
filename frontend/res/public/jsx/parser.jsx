@@ -10,7 +10,7 @@ class ParserComponent extends React.Component {
 
 	componentWillMount() {
 		this.props.socket.subscribe('/syndred/' + location.hash + '/parser',
-			(msg) => { this.setState(JSON.parse(msg.body)); }
+			(message) => this.setState(JSON.parse(message.body))
 		);
 	}
 
@@ -30,7 +30,7 @@ class ParserComponent extends React.Component {
 							Gramma</label>
 						<div className="col-lg-10">
 							<textarea id="parser-gramma" className="form-control" rows="5"
-							 	onChange={()=>{this.state.gramma=$('#parser-gramma').val();}}>
+								onChange={() => this.state.gramma=$('#parser-gramma').val() }>
 								{this.state.gramma}</textarea>
 						</div>
 					</div>
@@ -39,7 +39,7 @@ class ParserComponent extends React.Component {
 							Type</label>
 						<div className="col-lg-10">
 							<select id="parser-name" className="form-control"
-								onChange={()=>{this.state.name = $('#parser-name').val();}}>
+								onChange={() => this.state.name = $('#parser-name').val() }>
 								<option selected={this.state.name === 'regex'} value="regex">
 									Regular Expressions</option>
 								<option selected={this.state.name === 'ebnf'} value="ebnf">
@@ -52,7 +52,7 @@ class ParserComponent extends React.Component {
 					<div className="form-group">
 						<div className="col-lg-10 col-lg-offset-2">
 							<button type="submit" className="btn btn-primary"
-								onClick={(event)=>this.setParser(event)}>Apply</button>
+								onClick={(event) => this.setParser(event)}>Apply</button>
 						</div>
 					</div>
 				</fieldset>
