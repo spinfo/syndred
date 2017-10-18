@@ -21,7 +21,7 @@ public abstract class Task implements Runnable {
 	}
 
 	public final boolean completed() {
-		return position == characters.size();
+		return position == characters.size() - 1;
 	}
 
 	@Override
