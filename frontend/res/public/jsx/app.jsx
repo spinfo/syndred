@@ -16,31 +16,25 @@ class AppComponent extends React.Component {
     });
 	}
 
-	// componentWillUnmount() {
-	// 	if (this.state.socket !== null) {
-	// 		this.state.socket.disconnect(() => {
-	// 			this.setState({ ready: false, socket: null });
-	// 		});
-	// 	}
-	// }
-
 	render() {
-		return (
+		return this.state.ready ? (
 			<div className='row'>
 				<div className='col-md-5'>
-					{ this.state.ready &&
 						<ParserComponent socket={this.state.socket} />
-					}
 				</div>
 				<div className='col-md-7'>
-					{ this.state.ready &&
 						<EditorComponent socket={this.state.socket} />
-					}
 				</div>
 			</div>
-		);
+			)	: (
+				<div className='row'>
+					<div className='col-md-12 text-center'>
+						<img class="spinner" src="/spinner.svg" />
+						<h1><strong>Connecting</strong></h1>
+					</div>
+				</div>
+			)
 	}
-
 }
 
 ReactDOM.render(<AppComponent />, document.getElementById('app'));
