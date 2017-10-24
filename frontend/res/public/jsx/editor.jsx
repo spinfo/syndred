@@ -18,14 +18,21 @@ class EditorComponent extends React.Component {
 					Draft.EditorState.forceSelection(editorState, selection);
 
 				this.setState({editorState});
+				window.conplain = editorState.getCurrentContent().getPlainText();
+				$('div[role="textbox"]').prop('contenteditable', 'true');
 			}
 		);
 	}
 
 	parseState() {
-		clearTimeout(window.cooldown);
+		let conplain = this.state.editorState.getCurrentContent().getPlainText();
+		if (window.conplain === conplain) return;
+
 		let raw = Draft.convertToRaw(this.state.editorState.getCurrentContent());
 		let json = JSON.stringify(raw);
+
+		window.conplain = conplain;
+		$('div[role="textbox"]').prop('contenteditable', 'false');
 		this.props.socket.send('/syndred/' + location.hash + '/editor', {}, json);
 	}
 
@@ -48,9 +55,9 @@ class EditorComponent extends React.Component {
 				<Draft.Editor ref="editor"
 					editorState={this.state.editorState}
 					onChange={(editorState) => {
+						this.setState({editorState});
 						if (window.cooldown) clearTimeout(window.cooldown);
 						window.cooldown = setTimeout(() => this.parseState(), 500);
-						this.setState({editorState});
 					}}
 					spellCheck={false}
 				/>

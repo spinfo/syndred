@@ -13,23 +13,19 @@ public class Controller {
 
 	@SubscribeMapping("/{instance}/editor")
 	public RawDraftContentState editorInit(@DestinationVariable String instance) {
-		return new RawDraftContentState();
+		return Threading.getState(instance);
 	}
 
 	@MessageMapping("/{instance}/editor")
 	@SendTo("/syndred/{instance}/editor")
-	public RawDraftContentState editor(@DestinationVariable String instance, RawDraftContentState contentState) {
-		
-		
-		contentState.getBlocks().stream().forEach(i -> System.out.println(i.getText()));
-		return contentState;
+	public RawDraftContentState editor(@DestinationVariable String instance, RawDraftContentState state) {
+		Threading.setState(instance, state);
+		return Threading.getState(instance);
 	}
 
 	@SubscribeMapping("/{instance}/parser")
 	public Parser parserInit(@DestinationVariable String instance) {
-		Parser parser = new Parser();
-		parser.setName("ebnf");
-		return parser;
+		return Threading.getParser(instance);
 	}
 
 	@MessageMapping("/{instance}/parser")
@@ -57,7 +53,8 @@ public class Controller {
 			parser.setRunning(false);
 		}
 
-		return parser;
+		Threading.setParser(instance, parser);
+		return Threading.getParser(instance);
 	}
 
 }

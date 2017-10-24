@@ -62,8 +62,8 @@ class ParserComponent extends React.Component {
 						(this.state.running?" has-success":"")}>
 						<label for="parser-name" className="col-lg-2 control-label">
 							Status</label>
-						<div className="col-lg-10">
-							<button type="submit" className="btn btn-primary"
+						<div className="col-lg-4">
+							<button type="submit" className="btn btn-block btn-primary"
 								onClick={(event) => this.setParser(event)}>Apply</button>
 						</div>
 					</div>
