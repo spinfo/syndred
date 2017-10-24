@@ -30,6 +30,7 @@ public class RegexParser extends RegexTask{
 		while(matcher.find()){
 			findings.add(new InlineStyleRange(offset + matcher.start(), matcher.end()-matcher.start(),"success"));
 		}
+		errors = invertRanges(findings);
 		
 	}
 	
@@ -61,12 +62,4 @@ public class RegexParser extends RegexTask{
 		}
 		return invers;
 	}
-	
- /*
-  * public List<RichChar> characters = new ArrayList<RichChar>();
-
-	public List<InlineStyleRange> errors = new ArrayList<InlineStyleRange>();
-
-	public int position = 0;
-  */
 }
