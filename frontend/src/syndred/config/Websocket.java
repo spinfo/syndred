@@ -17,8 +17,7 @@ public class Websocket extends AbstractWebSocketMessageBrokerConfigurer {
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		registry.enableSimpleBroker("/editor", "/parser");
 		registry.setApplicationDestinationPrefixes("/syndred");
 	}
-	
+
 }

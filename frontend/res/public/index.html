@@ -6,6 +6,7 @@
 	<title>syndred &mdash; A Syntax-Driven Editor for Lexical Resources</title>
 	<description></description>
 
+	<script src="https://unpkg.com/cuid/dist/browser-cuid.js"></script>
 	<script src="https://unpkg.com/immutable/dist/immutable.min.js"></script>
 	<script src="https://unpkg.com/sockjs-client/dist/sockjs.min.js"></script>
 	<script src="https://unpkg.com/@stomp/stompjs/lib/stomp.min.js"></script>
@@ -18,8 +19,11 @@
 	<script src="https://unpkg.com/jquery/dist/jquery.min.js"></script>
 	<script src="https://unpkg.com/bootstrap/dist/js/bootstrap.min.js"></script>
 
+	<link rel="stylesheet" href="https://unpkg.com/draft-js/dist/Draft.css">
 	<link rel="stylesheet" href="https://unpkg.com/bootswatch/paper/bootstrap.min.css">
 	<link rel="stylesheet" href="style.css">
+
+	<script>if (!location.hash) location.hash = cuid();</script>
 </head>
 <body>
 	<nav class="navbar navbar-inverse">

@@ -2,6 +2,8 @@ package syndred.controllers;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
 import syndred.entities.Parser;
@@ -10,34 +12,44 @@ import syndred.entities.RawDraftContentState;
 @Controller
 public class WebsocketController {
 
-	@MessageMapping("/editor/{instance}")
-	// @SendTo("/editor/{instance}")
+	@SubscribeMapping("/{instance}/editor")
+	public RawDraftContentState editorInit(@DestinationVariable String instance) {
+		return new RawDraftContentState();
+	}
+	
+	@MessageMapping("/{instance}/editor")
+	@SendTo("/syndred/{instance}/editor")
 	public RawDraftContentState editor(@DestinationVariable String instance, RawDraftContentState contentState) {
-
-		System.out.println(contentState);
-
+		contentState.getBlocks().stream().forEach(i -> System.out.println(i.getText()));
 		return contentState;
 	}
 
-	@MessageMapping("/parser/{instance}")
-	// @SendTo("/parser/{instance}")
-	public Boolean parser(@DestinationVariable String instance, Parser parser) {
+	@SubscribeMapping("/{instance}/parser")
+	public Parser parserInit(@DestinationVariable String instance) {
+		return new Parser();
+	}
 
-		System.out.println(instance);
-
+	@MessageMapping("/{instance}/parser")
+	@SendTo("/syndred/{instance}/parser")
+	public Parser parser(@DestinationVariable String instance, Parser parser) {		
 		switch (parser.getName()) {
 		case "regex":
-			return true;
+			parser.setError(true);
+			break;
 
 		case "ebnf":
-			return true;
+			parser.setError(true);
+			break;
 
 		case "abnf":
-			return true;
+			parser.setError(true);
+			break;
 
 		default:
-			return false;
+			parser.setError(true);
 		}
+
+		return parser;
 	}
 
 }
