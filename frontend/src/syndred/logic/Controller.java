@@ -1,22 +1,21 @@
-package syndred.controllers;
+package syndred.logic;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.stereotype.Controller;
 
 import syndred.entities.Parser;
 import syndred.entities.RawDraftContentState;
 
-@Controller
-public class WebsocketController {
+@org.springframework.stereotype.Controller
+public class Controller {
 
 	@SubscribeMapping("/{instance}/editor")
 	public RawDraftContentState editorInit(@DestinationVariable String instance) {
 		return new RawDraftContentState();
 	}
-	
+
 	@MessageMapping("/{instance}/editor")
 	@SendTo("/syndred/{instance}/editor")
 	public RawDraftContentState editor(@DestinationVariable String instance, RawDraftContentState contentState) {
@@ -31,7 +30,7 @@ public class WebsocketController {
 
 	@MessageMapping("/{instance}/parser")
 	@SendTo("/syndred/{instance}/parser")
-	public Parser parser(@DestinationVariable String instance, Parser parser) {		
+	public Parser parser(@DestinationVariable String instance, Parser parser) {
 		switch (parser.getName()) {
 		case "regex":
 			parser.setError(true);

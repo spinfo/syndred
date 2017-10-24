@@ -11,7 +11,7 @@ class AppComponent extends React.Component {
 		super(props);
 		$(window).on('hashchange', () => { location.reload(); });
 
-    this.state.socket.connect({}, (frame) => {
+    this.state.socket.connect({instance: location.hash}, (frame) => {
 			this.setState({ ready: true });
     });
 	}
