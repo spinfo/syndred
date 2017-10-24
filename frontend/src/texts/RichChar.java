@@ -8,18 +8,4 @@ public class RichChar {
 
 	public int textDecoration;
 
-	public char getCh() {
-		return ch;
-	}
-
-	public boolean isSuccess() {
-		return success;
-	}
-
-	public int getTextDecoration() {
-		return textDecoration;
-	}
-	
-	
-
 }
