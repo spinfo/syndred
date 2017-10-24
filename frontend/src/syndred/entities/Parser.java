@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Parser implements Serializable {
 
 	@JsonProperty("name")
-	private String name;
+	private String name = "ebnf";
 
 	@JsonProperty("gramma")
 	private String gramma;
