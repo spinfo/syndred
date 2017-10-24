@@ -3,9 +3,10 @@
 class ParserComponent extends React.Component {
 
 	state = {
-		name: 'ebnf',
+		name: '',
 		gramma: '',
-		error: false
+		error: '',
+		running: false
 	};
 
 	componentWillMount() {
@@ -25,7 +26,14 @@ class ParserComponent extends React.Component {
 			<form id="parser" className="form-horizontal well">
 				<fieldset>
 					<legend>Parser</legend>
-					<div className={"form-group"+(this.state.error?" has-error":"")}>
+					{this.state.error &&
+						<div className="alert alert-dismissible alert-danger">
+							<button type="button" className="close" onClick={() =>
+								this.setState({error:''})}>&times;</button>{this.state.error}
+						</div>
+					}
+					<div className={"form-group"+(this.state.error?" has-error":"")+
+						(this.state.running?" has-success":"")}>
 						<label for="parser-gramma" className="col-lg-2 control-label">
 							Gramma</label>
 						<div className="col-lg-10">
@@ -34,7 +42,8 @@ class ParserComponent extends React.Component {
 								{this.state.gramma}</textarea>
 						</div>
 					</div>
-					<div className={"form-group"+(this.state.error?" has-error":"")}>
+					<div className={"form-group"+(this.state.error?" has-error":"")+
+						(this.state.running?" has-success":"")}>
 						<label for="parser-name" className="col-lg-2 control-label">
 							Type</label>
 						<div className="col-lg-10">
@@ -49,8 +58,11 @@ class ParserComponent extends React.Component {
 							</select>
 						</div>
 					</div>
-					<div className="form-group">
-						<div className="col-lg-10 col-lg-offset-2">
+					<div className={"form-group"+(this.state.error?" has-error":"")+
+						(this.state.running?" has-success":"")}>
+						<label for="parser-name" className="col-lg-2 control-label">
+							Status</label>
+						<div className="col-lg-10">
 							<button type="submit" className="btn btn-primary"
 								onClick={(event) => this.setParser(event)}>Apply</button>
 						</div>

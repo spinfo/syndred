@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "name", "gramma", "error" })
+@JsonPropertyOrder({ "name", "gramma", "error", "running" })
 public class Parser implements Serializable {
 
 	@JsonProperty("name")
@@ -17,7 +17,10 @@ public class Parser implements Serializable {
 	private String gramma;
 
 	@JsonProperty("error")
-	private Boolean error;
+	private String error;
+
+	@JsonProperty("running")
+	private Boolean running;
 
 	private final static long serialVersionUID = 1830572674619370572L;
 
@@ -42,13 +45,23 @@ public class Parser implements Serializable {
 	}
 
 	@JsonProperty("error")
-	public Boolean getError() {
+	public String getError() {
 		return error;
 	}
 
 	@JsonProperty("error")
-	public void setError(Boolean error) {
+	public void setError(String error) {
 		this.error = error;
+	}
+
+	@JsonProperty("running")
+	public Boolean getRunning() {
+		return running;
+	}
+
+	@JsonProperty("running")
+	public void setRunning(Boolean running) {
+		this.running = running;
 	}
 
 }
