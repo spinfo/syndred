@@ -10,7 +10,7 @@ class ParserComponent extends React.Component {
 	};
 
 	componentWillMount() {
-		this.props.socket.subscribe('/syndred/' + location.hash + '/parser',
+		this.props.socket.subscribe('/syndred/'+location.hash+'/parser/pull',
 			(message) => this.setState(JSON.parse(message.body))
 		);
 	}
@@ -18,7 +18,7 @@ class ParserComponent extends React.Component {
 	setParser(event) {
 		event.preventDefault();
 		let json = JSON.stringify(this.state);
-		this.props.socket.send('/syndred/' + location.hash + '/parser', {}, json);
+		this.props.socket.send('/syndred/'+location.hash+'/parser/push', {}, json);
 	}
 
 	render() {

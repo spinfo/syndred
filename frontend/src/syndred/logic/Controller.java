@@ -11,50 +11,26 @@ import syndred.entities.RawDraftContentState;
 @org.springframework.stereotype.Controller
 public class Controller {
 
-	@SubscribeMapping("/{instance}/editor")
-	public RawDraftContentState editorInit(@DestinationVariable String instance) {
-		return Threading.getState(instance);
+	@SubscribeMapping("/{instance}/editor/pull")
+	public RawDraftContentState editorPull(@DestinationVariable String instance) {
+		return Threading.pull(instance);
 	}
 
-	@MessageMapping("/{instance}/editor")
-	@SendTo("/syndred/{instance}/editor")
-	public RawDraftContentState editor(@DestinationVariable String instance, RawDraftContentState state) {
-		Threading.setState(instance, state);
-		return Threading.getState(instance);
+	@MessageMapping("/{instance}/editor/push")
+	public void editorPush(@DestinationVariable String instance, RawDraftContentState state)
+			throws InterruptedException {
+		Threading.push(instance, state);
 	}
 
-	@SubscribeMapping("/{instance}/parser")
+	@SubscribeMapping("/{instance}/parser/pull")
 	public Parser parserInit(@DestinationVariable String instance) {
-		return Threading.getParser(instance);
+		return Threading.parser(instance);
 	}
 
-	@MessageMapping("/{instance}/parser")
-	@SendTo("/syndred/{instance}/parser")
-	public Parser parser(@DestinationVariable String instance, Parser parser) {
-		switch (parser.getName()) {
-		case "regex":
-			parser.setError("");
-			parser.setRunning(true);
-			parser.setName("ebnf");
-			break;
-
-		case "ebnf":
-			parser.setError("Not implemented");
-			parser.setRunning(false);
-			break;
-
-		case "abnf":
-			parser.setError("Not implemented");
-			parser.setRunning(false);
-			break;
-
-		default:
-			parser.setError("true");
-			parser.setRunning(false);
-		}
-
-		Threading.setParser(instance, parser);
-		return Threading.getParser(instance);
+	@MessageMapping("/{instance}/parser/push")
+	@SendTo("/syndred/{instance}/parser/pull")
+	public Parser parserPush(@DestinationVariable String instance, Parser parser) {
+		return Threading.run(instance, parser);
 	}
 
 }

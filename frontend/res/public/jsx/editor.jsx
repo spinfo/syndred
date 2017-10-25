@@ -5,7 +5,7 @@ class EditorComponent extends React.Component {
 	state = {editorState: Draft.EditorState.createEmpty()};
 
 	componentWillMount() {
-		this.props.socket.subscribe('/syndred/' + location.hash + '/editor',
+		this.props.socket.subscribe('/syndred/'+location.hash+'/editor/pull',
 			(message) => {
 				let raw = JSON.parse(message.body);
 				if (jQuery.isEmptyObject(raw)) return;
@@ -24,16 +24,16 @@ class EditorComponent extends React.Component {
 		);
 	}
 
-	parseState() {
+	parseState(force = false) {
 		let conplain = this.state.editorState.getCurrentContent().getPlainText();
-		if (window.conplain === conplain) return;
+		if (!force && window.conplain === conplain) return;
 
 		let raw = Draft.convertToRaw(this.state.editorState.getCurrentContent());
 		let json = JSON.stringify(raw);
 
 		window.conplain = conplain;
 		$('div[role="textbox"]').prop('contenteditable', 'false');
-		this.props.socket.send('/syndred/' + location.hash + '/editor', {}, json);
+		this.props.socket.send('/syndred/'+location.hash+'/editor/push', {}, json);
 	}
 
 	render() {
@@ -49,6 +49,7 @@ class EditorComponent extends React.Component {
 						return (<span className={className} onMouseDown={(event) => {
 							event.preventDefault();
 							this.setState({editorState});
+							this.parseState(true);
 						}}>{style}</span>);
 					})}
 				</div>
