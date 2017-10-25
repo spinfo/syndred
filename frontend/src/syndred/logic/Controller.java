@@ -1,5 +1,7 @@
 package syndred.logic;
 
+import java.util.concurrent.ExecutionException;
+
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -29,7 +31,8 @@ public class Controller {
 
 	@MessageMapping("/{instance}/parser/push")
 	@SendTo("/syndred/{instance}/parser/pull")
-	public Parser parserPush(@DestinationVariable String instance, Parser parser) {
+	public Parser parserPush(@DestinationVariable String instance, Parser parser)
+			throws InterruptedException, ExecutionException {
 		return Threading.run(instance, parser);
 	}
 

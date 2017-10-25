@@ -1,30 +1,45 @@
 package syndred.tasks;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.ParseException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
-import syndred.entities.InlineStyleRange;
-import texts.RichChar;
+import syndred.entities.Parser;
+import syndred.entities.RawDraftContentState;
 
-public abstract class Task implements Runnable {
+public abstract class Task implements Callable<Parser> {
 
-	public List<RichChar> characters = new ArrayList<RichChar>();
+	private final BlockingQueue<RawDraftContentState> input;
 
-	public List<InlineStyleRange> errors = new ArrayList<InlineStyleRange>();
+	private final Function<RawDraftContentState, Exception> output;
 
-	public int position = 0;
+	private final Parser parser;
 
-	protected final String gramma;
-
-	public Task(String gramma) {
-		this.gramma = gramma;
-	}
-
-	public final boolean completed() {
-		return position == characters.size() - 1;
+	public Task(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
+			Parser parser) {
+		this.input = input;
+		this.output = output;
+		this.parser = parser;
 	}
 
 	@Override
-	public abstract void run();
+	public Parser call() {
+		while (!Thread.interrupted()) {
+			try {
+				Exception error = output.apply(parse(input.take()));
+				if (error != null)
+					throw error;
+			} catch (Exception error) {
+				parser.setRunning(false);
+				parser.setError(error.getClass().getSimpleName() + ": " + error.getMessage());
+				break;
+			}
+		}
+
+		return parser;
+	};
+
+	abstract protected RawDraftContentState parse(RawDraftContentState state) throws ParseException;
 
 }

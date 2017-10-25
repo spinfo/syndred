@@ -48,8 +48,7 @@ class EditorComponent extends React.Component {
 						editorState = Draft.RichUtils.toggleInlineStyle(editorState, style);
 						return (<span className={className} onMouseDown={(event) => {
 							event.preventDefault();
-							this.setState({editorState});
-							this.parseState(true);
+							this.setState({editorState}, () => this.parseState(true));
 						}}>{style}</span>);
 					})}
 				</div>

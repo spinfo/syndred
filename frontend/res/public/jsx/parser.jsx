@@ -55,6 +55,8 @@ class ParserComponent extends React.Component {
 									Extended Backus–Naur form (EBNF)</option>
 								<option selected={this.state.name === 'regex'} value="regex">
 									Regular Expressions</option>
+								<option selected={this.state.name === 'test'} value="test">
+									Simple echo test</option>
 							</select>
 						</div>
 					</div>
