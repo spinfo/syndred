@@ -38,8 +38,8 @@ class ParserComponent extends React.Component {
 							Gramma</label>
 						<div className="col-lg-10">
 							<textarea id="parser-gramma" className="form-control" rows="5"
-								onChange={() => this.state.gramma=$('#parser-gramma').val() }>
-								{this.state.gramma}</textarea>
+								value={this.state.gramma} onChange={() => this.setState({gramma:
+								$('#parser-gramma').val()})}></textarea>
 						</div>
 					</div>
 					<div className={"form-group"+(this.state.error?" has-error":"")+
