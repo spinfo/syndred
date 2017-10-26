@@ -1,0 +1,23 @@
+div[role="textbox"] {
+	background-color: white;
+	border-radius: 5px;
+	box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+	margin-top: 25px;
+	min-height: 400px;
+	padding: 10px;
+	transition: 50ms;
+}
+div[role="textbox"][contenteditable="false"] {
+	background-color: rgba(0,0,0,0.4);
+	pointer-events: none;
+}
+
+@keyframes spinner {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(359deg); }
+}
+.spinner {
+	animation: spinner 2s linear infinite;
+	height: 100px;
+	width: 100px;
+}
