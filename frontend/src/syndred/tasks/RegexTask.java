@@ -1,55 +1,62 @@
 package syndred.tasks;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import syndred.entities.Block;
 import syndred.entities.InlineStyleRange;
+import syndred.entities.Parser;
+import syndred.entities.RawDraftContentState;
 import texts.RichChar;
 
 public class RegexTask extends Task {
 
-	public RegexTask(String gramma) {
-		super(gramma);
+	public RegexTask(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
+			Parser parser) {
+		super(input, output, parser);
 	}
-	
-	private int offset;
 
 	@Override
-	public void run() {
-		String s = richCharListToString(characters);
-		int offset = position;
-		position = position + s.length();
-		
-		// Grammatik für die Fehler einfach umkehren? geht das? sinnvoll
-		Pattern pattern  = Pattern.compile(gramma);
-		
-		Matcher matcher = pattern.matcher(s);
-		List<InlineStyleRange> findings = new ArrayList<InlineStyleRange>();
-		while(matcher.find()){
-			findings.add(new InlineStyleRange(offset + matcher.start(), matcher.end()-matcher.start(),"success"));
+	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
+		List<Block> blocks = state.getBlocks();
+		Pattern pattern = Pattern.compile(parser.getGramma());
+		for(Block b : blocks){
+			Matcher matcher = pattern.matcher(b.getText());
+			List<InlineStyleRange> findings = new ArrayList<InlineStyleRange>();
+			while(matcher.find()){
+				findings.add(new InlineStyleRange(matcher.start(), matcher.end()-matcher.start(),"success"));
+			}
+			List<InlineStyleRange> errors = invertRanges(findings);
+			
+			b.addInlineStyleRanges(errors);
+			b.addInlineStyleRanges(findings);
 		}
-		errors = invertRanges(findings);
+		state.setBlocks(blocks);
+		
+		
+		// _____ KOMPLEXE IMPlEMENTIERUNG UMFASST FOLGENDES:
+		// aufteilen in ContentBlocks
+		// Abgleich mit vorausgehenden Blocks (wo ist der gespeichert?)
+		// RChar - List <- nicht mehr Teil des eigentlichen Interfaces, d. h. auch weglassbar
+		// eigentl. Parsing
+		// zurück in einen content-State
+		return state;
 	}
-	
-	private String richCharListToString(List<RichChar> rcList){
-		StringBuilder sb = new StringBuilder();
-		for(RichChar rc : rcList){
-			sb.append(rc.getCh());
-		}
-		return sb.toString();
-	}
-	
+
 	private List<InlineStyleRange> invertRanges(List<InlineStyleRange> ranges){
 		List<InlineStyleRange> invers = new ArrayList<InlineStyleRange>();
 		Iterator<InlineStyleRange> iter = ranges.iterator();
 		if(iter.hasNext()){
 			InlineStyleRange range1 = iter.next();
 			int off = range1.getOffset();
-			if(off > offset){
-				invers.add(new InlineStyleRange(offset, off-offset, "error"));
+			if(off > 0){
+				invers.add(new InlineStyleRange(0, off, "error"));
 			}
 			while(iter.hasNext()){
 				InlineStyleRange range2 = iter.next();

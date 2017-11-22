@@ -21,6 +21,12 @@ public class InlineStyleRange implements Serializable {
 
 	private final static long serialVersionUID = -7052774662304691500L;
 
+	public InlineStyleRange(int offset, int length, String style){
+		this.offset = offset;
+		this.length = length;
+		this.style = style;
+	}
+	
 	@JsonProperty("offset")
 	public Integer getOffset() {
 		return offset;

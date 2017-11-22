@@ -14,7 +14,7 @@ public abstract class Task implements Callable<Parser> {
 
 	private final Function<RawDraftContentState, Exception> output;
 
-	private final Parser parser;
+	protected final Parser parser;
 
 	public Task(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
 			Parser parser) {

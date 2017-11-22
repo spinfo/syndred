@@ -86,8 +86,9 @@ public class Threading {
 			return parser;
 
 		case "regex":
-			parser.setError("Not implemented");
-			parser.setRunning(false);
+			future = executorService.submit(new EchoTask(input.get(instance), output.get(instance), parser));
+//			parser.setError("Not implemented");
+//			parser.setRunning(false);
 			return parser;
 
 		case "test":
