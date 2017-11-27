@@ -13,6 +13,7 @@ import java.util.function.Function;
 import syndred.entities.Parser;
 import syndred.entities.RawDraftContentState;
 import syndred.tasks.EchoTask;
+import syndred.tasks.RegexTask;
 
 public class Threading {
 
@@ -86,7 +87,7 @@ public class Threading {
 			return parser;
 
 		case "regex":
-			future = executorService.submit(new EchoTask(input.get(instance), output.get(instance), parser));
+			future = executorService.submit(new RegexTask(input.get(instance), output.get(instance), parser));
 //			parser.setError("Not implemented");
 //			parser.setRunning(false);
 			return parser;

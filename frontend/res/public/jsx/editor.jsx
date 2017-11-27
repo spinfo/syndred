@@ -1,10 +1,10 @@
 'use strict';
 
-const styleMap = {
+/*const styleMap = {
 		'error': {
-			text-decoration: 'line-through',
+			textDecoration: 'line-through',
 		},
-	}
+	}*/
 
 class EditorComponent extends React.Component {
 
@@ -60,7 +60,7 @@ class EditorComponent extends React.Component {
 				</div>
 				<Draft.Editor ref="editor"
 
-					customStyleMap = {styleMap}
+					/*customStyleMap = {styleMap}*/
 					editorState={this.state.editorState}
 					onChange={(editorState) => {
 						this.setState({editorState});
