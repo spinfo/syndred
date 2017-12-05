@@ -54,4 +54,11 @@ public class InlineStyleRange implements Serializable {
 		this.style = style;
 	}
 
+	@Override
+	public String toString() {
+		return "InlineStyleRange [offset=" + offset + ", length=" + length + ", style=" + style + "]";
+	}
+	
+	
+
 }

@@ -30,12 +30,14 @@ public class RegexTask extends Task {
 
 	@Override
 	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
-		List<Block> blocks = state.getBlocks();
 		System.out.println("RegexParse");
+		List<Block> blocks = state.getBlocks();
+		
 	Iterator<Block> iterator = blocks.iterator();
 		Pattern pattern = Pattern.compile(parser.getGramma());
 		while(iterator.hasNext()){
 			Block b = iterator.next();
+			b.setInlineStyleRanges(new ArrayList<InlineStyleRange>());
 			Matcher matcher = pattern.matcher(b.getText());
 			List<InlineStyleRange> findings = new ArrayList<InlineStyleRange>();
 			while(matcher.find()){
@@ -50,16 +52,15 @@ public class RegexTask extends Task {
 			System.out.println("Errors: " + errors.size());
 			b.addInlineStyleRanges(errors);
 			b.addInlineStyleRanges(findings);
+//			InlineStyleRange styleBuffer = new InlineStyleRange();
+//			styleBuffer.setOffset(b.getText().length());
+//			styleBuffer.setLength(1);
+//			styleBuffer.setStyle("unstyled");
+//			b.addInlineStyleRange(styleBuffer);
 		}
 //		state.setBlocks(blocks);
 		
-		
-		// _____ KOMPLEXE IMPlEMENTIERUNG UMFASST FOLGENDES:
-		// aufteilen in ContentBlocks
-		// Abgleich mit vorausgehenden Blocks (wo ist der gespeichert?)
-		// RChar - List <- nicht mehr Teil des eigentlichen Interfaces, d. h. auch weglassbar
-		// eigentl. Parsing
-		// zurück in einen content-State
+		// Kontrollausgabe in json-Datei
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			mapper.writeValue(new File("test/regexReturn.json"), state);
@@ -68,43 +69,6 @@ public class RegexTask extends Task {
 			e.printStackTrace();
 		}
 		return state;
-	}
-
-	private List<InlineStyleRange> invertRanges(List<InlineStyleRange> ranges, int blockLength){
-		List<InlineStyleRange> invers = new ArrayList<InlineStyleRange>();
-		Iterator<InlineStyleRange> iter = ranges.iterator();
-		if(iter.hasNext()){
-			InlineStyleRange range1 = iter.next();
-			int off = range1.getOffset();
-			if(off > 0){
-				InlineStyleRange range = new InlineStyleRange();
-				range.setOffset(0);
-				range.setLength(off);
-				range.setStyle("error");
-				invers.add(range);
-			}
-			while(iter.hasNext()){
-				InlineStyleRange range2 = iter.next();
-				int pos = off+range1.getLength();
-				if(pos < range2.getOffset()){
-					InlineStyleRange range = new InlineStyleRange();
-					range.setOffset(pos);
-					range.setLength(range2.getOffset()-pos);
-					range.setStyle("error");
-					invers.add(range);
-				}
-				range1 = range2;
-			}
-			int endOfLastRange = range1.getOffset()+range1.getLength();
-			if(endOfLastRange < blockLength){
-				InlineStyleRange range = new InlineStyleRange();
-				range.setOffset(endOfLastRange+1);
-				range.setLength(blockLength - endOfLastRange);
-				range.setStyle("error");
-				invers.add(range);
-			}
-		}
-		return invers;
 	}
 
 }

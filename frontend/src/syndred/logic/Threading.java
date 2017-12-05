@@ -90,7 +90,7 @@ public class Threading {
 			future = executorService.submit(new RegexTask(input.get(instance), output.get(instance), parser));
 //			parser.setError("Not implemented");
 //			parser.setRunning(false);
-			return parser;
+			break;
 
 		case "test":
 			future = executorService.submit(new EchoTask(input.get(instance), output.get(instance), parser));
