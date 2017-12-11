@@ -1,5 +1,15 @@
 'use strict';
 
+const styleMap = {
+		'error': {
+			borderBottom: '2px dotted #f00',
+    		textDecoration: 'none'
+		},
+		'success': {
+			color: 'green'
+		}
+	}
+
 class EditorComponent extends React.Component {
 
 	state = {editorState: Draft.EditorState.createEmpty()};
@@ -53,6 +63,8 @@ class EditorComponent extends React.Component {
 					})}
 				</div>
 				<Draft.Editor ref="editor"
+
+					customStyleMap = {styleMap}
 					editorState={this.state.editorState}
 					onChange={(editorState) => {
 						this.setState({editorState});

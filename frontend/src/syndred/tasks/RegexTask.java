@@ -1,66 +1,74 @@
 package syndred.tasks;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import syndred.entities.Block;
 import syndred.entities.InlineStyleRange;
+import syndred.entities.Parser;
+import syndred.entities.RawDraftContentState;
 import texts.RichChar;
 
 public class RegexTask extends Task {
 
-	public RegexTask(String gramma) {
-		super(gramma);
+	public RegexTask(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
+			Parser parser) {
+		super(input, output, parser);
 	}
-	
-	private int offset;
 
 	@Override
-	public void run() {
-		String s = richCharListToString(characters);
-		int offset = position;
-		position = position + s.length();
+	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
+		System.out.println("RegexParse");
+		List<Block> blocks = state.getBlocks();
 		
-		// Grammatik für die Fehler einfach umkehren? geht das? sinnvoll
-		Pattern pattern  = Pattern.compile(gramma);
+	Iterator<Block> iterator = blocks.iterator();
+		Pattern pattern = Pattern.compile(parser.getGramma());
+		while(iterator.hasNext()){
+			Block b = iterator.next();
+			b.setInlineStyleRanges(new ArrayList<InlineStyleRange>());
+			Matcher matcher = pattern.matcher(b.getText());
+			List<InlineStyleRange> findings = new ArrayList<InlineStyleRange>();
+			while(matcher.find()){
+				System.out.println("match");
+				InlineStyleRange range = new InlineStyleRange();
+				range.setOffset(matcher.start());
+				range.setLength(matcher.end()-matcher.start());
+				range.setStyle("success");
+				findings.add(range);
+			}
+			List<InlineStyleRange> errors = invertRanges(findings, b.getText().length());
+			System.out.println("Errors: " + errors.size());
+			b.addInlineStyleRanges(errors);
+			b.addInlineStyleRanges(findings);
+//			InlineStyleRange styleBuffer = new InlineStyleRange();
+//			styleBuffer.setOffset(b.getText().length());
+//			styleBuffer.setLength(1);
+//			styleBuffer.setStyle("unstyled");
+//			b.addInlineStyleRange(styleBuffer);
+		}
+//		state.setBlocks(blocks);
 		
-		Matcher matcher = pattern.matcher(s);
-		List<InlineStyleRange> findings = new ArrayList<InlineStyleRange>();
-		while(matcher.find()){
-			findings.add(new InlineStyleRange(offset + matcher.start(), matcher.end()-matcher.start(),"success"));
+		// Kontrollausgabe in json-Datei
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			mapper.writeValue(new File("test/regexReturn.json"), state);
+		} catch (IOException e) {
+			System.out.println("JSON-Generator-Error");
+			e.printStackTrace();
 		}
-		errors = invertRanges(findings);
-	}
-	
-	private String richCharListToString(List<RichChar> rcList){
-		StringBuilder sb = new StringBuilder();
-		for(RichChar rc : rcList){
-			sb.append(rc.getCh());
-		}
-		return sb.toString();
-	}
-	
-	private List<InlineStyleRange> invertRanges(List<InlineStyleRange> ranges){
-		List<InlineStyleRange> invers = new ArrayList<InlineStyleRange>();
-		Iterator<InlineStyleRange> iter = ranges.iterator();
-		if(iter.hasNext()){
-			InlineStyleRange range1 = iter.next();
-			int off = range1.getOffset();
-			if(off > offset){
-				invers.add(new InlineStyleRange(offset, off-offset, "error"));
-			}
-			while(iter.hasNext()){
-				InlineStyleRange range2 = iter.next();
-				int pos = off+range1.getLength();
-				if(pos < range2.getOffset()){
-					invers.add(new InlineStyleRange(pos, range2.getOffset()-pos, "error"));
-				}
-				range1 = range2;
-			}
-		}
-		return invers;
+		return state;
 	}
 
 }

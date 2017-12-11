@@ -20,6 +20,9 @@ public class InlineStyleRange implements Serializable {
 	private String style;
 
 	private final static long serialVersionUID = -7052774662304691500L;
+	
+	public InlineStyleRange() {
+	}
 
 	@JsonProperty("offset")
 	public Integer getOffset() {
@@ -50,5 +53,12 @@ public class InlineStyleRange implements Serializable {
 	public void setStyle(String style) {
 		this.style = style;
 	}
+
+	@Override
+	public String toString() {
+		return "InlineStyleRange [offset=" + offset + ", length=" + length + ", style=" + style + "]";
+	}
+	
+	
 
 }

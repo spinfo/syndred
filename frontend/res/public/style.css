@@ -21,3 +21,8 @@ div[role="textbox"][contenteditable="false"] {
 	height: 100px;
 	width: 100px;
 }
+
+.error {
+	border-bottom: 1px dotted #f00;
+    text-decoration: none;
+}

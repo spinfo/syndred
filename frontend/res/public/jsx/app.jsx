@@ -23,7 +23,7 @@ class AppComponent extends React.Component {
 						<ParserComponent socket={this.state.socket} />
 				</div>
 				<div className='col-md-7'>
-						<EditorComponent socket={this.state.socket} />
+						<EditorComponent socket={this.state.socket}  />
 				</div>
 			</div>
 			)	: (
