@@ -12,6 +12,7 @@ import java.util.function.Function;
 
 import syndred.entities.Parser;
 import syndred.entities.RawDraftContentState;
+import syndred.tasks.EbnfTask;
 import syndred.tasks.EchoTask;
 import syndred.tasks.RegexTask;
 
@@ -82,9 +83,8 @@ public class Threading {
 			return parser;
 
 		case "ebnf":
-			parser.setError("Not implemented");
-			parser.setRunning(false);
-			return parser;
+			future = executorService.submit(new EbnfTask(input.get(instance), output.get(instance), parser));
+			break;
 
 		case "regex":
 			future = executorService.submit(new RegexTask(input.get(instance), output.get(instance), parser));

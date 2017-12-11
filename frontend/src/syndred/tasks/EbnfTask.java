@@ -37,12 +37,17 @@ public class EbnfTask extends Task {
 		super(input, output, parser);
 		
 		this.shared = new Shared();
+		prevBlocks = new ArrayList<Block>();
+		ebnfParser = new EbnfParser();
+		ebnfParser.startThread();
 		
 	}
 
 	@Override
 	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
 		
+		
+		System.out.println("ebnf parse");
 		// _____ KOMPLEXE IMPlEMENTIERUNG UMFASST FOLGENDES:
 		// aufteilen in ContentBlocks
 		// Abgleich mit vorausgehenden Blocks (wo ist der gespeichert?)
@@ -50,21 +55,22 @@ public class EbnfTask extends Task {
 		// eigentl. Parsing
 		// zurück in einen content-State
 		
-	
-		
-//		List<RichChar> rchList = new ArrayList<RichChar>();
 		length = 0;
 		
 		List<Block> currBlocks = state.getBlocks();
 		Iterator<Block> iter = currBlocks.iterator();
 		Block block;	
 				
-		while (iter.hasNext() && (block = iter.next()) != null) {
-			block = parseBlock(block);
-			
-			prevBlocks = state.getBlocks();
-
+		System.out.println("no. of blocks:" + currBlocks.size());
+		if(currBlocks.size() >= 1 && currBlocks.get(0).getText().length() > 0){
+			while (iter.hasNext() && (block = iter.next()) != null) {
+				System.out.println("parse block: " + block.getText());
+				block = parseBlock(block);
+				
+				prevBlocks = state.getBlocks();
+			}
 		}
+		
 		
 		// Kontrollausgabe in json-Datei
 		ObjectMapper mapper = new ObjectMapper();
@@ -74,13 +80,17 @@ public class EbnfTask extends Task {
 			System.out.println("JSON-Generator-Error");
 			e.printStackTrace();
 		}
+		
 		return state;
 	}
 
 private Block parseBlock(Block block) {
+	System.out.println("parseBlock");
 	if (prevBlocks.stream().anyMatch(i -> i.getKey().equals(block.getKey()))) {
+		System.out.println("to parseExistingBlock");
 		return parseExistingBlock(block);
 	} else {
+		System.out.println("to parseUnknownBlock");
 		return parseUnknownBlock(block);
 	}
 }
@@ -138,9 +148,28 @@ private Block parseUnknownBlock(Block block) {
 		} catch (Exception e) {
 		}
 	}
-
-	if (i == text.length && i > 0 && ebnfParser.parsed)
-		block.setType("parsed");
+	
+	// Erfolg abfragen
+	if (i == text.length && i > 0 && ebnfParser.parsed){
+		InlineStyleRange range = new InlineStyleRange();
+		range.setOffset(0);
+		range.setLength(i);
+		range.setStyle("success");
+		block.addInlineStyleRange(range);
+		// Fehler 
+	} else if(i == text.length && !ebnfParser.parsed){
+		InlineStyleRange successRange = new InlineStyleRange();
+		successRange.setOffset(0);
+		successRange.setLength(i-1);
+		successRange.setStyle("success");
+		block.addInlineStyleRange(successRange);
+		InlineStyleRange errorRange = new InlineStyleRange();
+		errorRange.setOffset(i);
+		errorRange.setLength(text.length-i);
+		errorRange.setStyle("error");
+		block.addInlineStyleRange(errorRange);
+	}
+		
 
 	length += i;
 	return block;
