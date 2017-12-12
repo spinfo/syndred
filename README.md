@@ -1,6 +1,6 @@
 # Syndred
 
-A Syntax-Driven Editor for Lexical Resources
+A Syntax-Driven Editor 
 
 
 ## Theoretischer Rahmen
