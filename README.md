@@ -2,7 +2,7 @@
 
 A Syntax-Driven Editor 
 
-[Wiki] (https://github.com/spinfo/syndred/wiki)
+Wiki: https://github.com/spinfo/syndred/wiki
 
 
 ## Theoretischer Rahmen
