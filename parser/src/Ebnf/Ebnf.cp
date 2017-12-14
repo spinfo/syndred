@@ -39,6 +39,12 @@ TYPE Identifier = ARRAY IdLen OF CHAR;
      	reg:RegexApi.Regex;
      END;
      
+     (* wrapper for Symbols p, q,r,s which might be used in ebnf as substitute for call by name;
+     to be used for reemplimation in java *)
+     
+     SymbolsWrapper =POINTER TO RECORD p,q,r,s:Symbol;
+     END;
+     
      Nonterminal = POINTER TO NTSDesc;
 	 NTSDesc = RECORD (Symbol) this: Header END;
 	 Header = POINTER TO HDesc;
@@ -270,7 +276,7 @@ PROCEDURE Compile*():BOOLEAN;
 VAR ok:BOOLEAN;
 BEGIN (*set R to the beginning of the text to be compiled*) 
 	TextsCP.WriteString(W,"Compile Start read Grammar");Console.WriteLn();
-	R.filename:= "lexGrammar.txt";	
+	R.filename:= "C://users//rols//lexGrammar.txt";	
 	TextsCP.OpenReader(R);
 	Console.WriteString("EBNF nach OpenReader");Console.WriteLn();	
 	
@@ -335,11 +341,18 @@ VAR resParse:BOOLEAN; pos:INTEGER;nodeName:ARRAY IdLen OF CHAR;
 	
 
 BEGIN (*parse*)
+	(* 17-12-12*)
+	IF node = NIL THEN 
+		Console.WriteString("parse entry node nil");
+		Console.WriteLn();
+		RETURN TRUE;
+	END;
 	IF shared.backTrack THEN
 		IF node#list.entry THEN RETURN FALSE
 		ELSE
 			txt.setTextPos(0);
-			Console.WriteString("parse after backtrack restart");Console.WriteLn();
+			Console.WriteString("parse after backtrack restart");
+			Console.WriteLn();
 			shared.backTrack:=FALSE;
 		END;
 	END;
@@ -350,8 +363,8 @@ BEGIN (*parse*)
 	Console.WriteString("parse node: "+nodeName);Console.WriteLn();
 	pos:=txt.getTextPos();
 	resParse:=FALSE;	
-	IF node = NIL THEN RETURN TRUE
-	ELSIF node IS Terminal THEN
+	(* 17-12-12 IF node = NIL THEN RETURN TRUE
+	ELS*)IF node IS Terminal THEN
 			resParse:=match(node(Terminal));
 			IF shared.backTrack THEN RETURN FALSE END;
 			Console.WriteString("parse resParse after match Pos: ");
@@ -365,9 +378,16 @@ BEGIN (*parse*)
 	END;
 	IF shared.backTrack THEN RETURN FALSE END;
 	(* bredth second recursion*)
-	IF resParse THEN resParse:=parse(node.next);
+	IF resParse THEN 
+		Console.WriteString ("parse vor bredth second");
+		Console.WriteLn();
+		IF node.next=NIL THEN
+			Console.WriteString ("node.next NIL vor bredth second");
+			Console.WriteLn();
+		END;
+		resParse:=parse(node.next);
 		IF shared.backTrack THEN RETURN FALSE
-		ELSIF resParse THEN RETURN TRUE;
+		ELSIF resParse  THEN RETURN TRUE;
 		END;
 	END;
 	IF shared.backTrack THEN RETURN FALSE 
