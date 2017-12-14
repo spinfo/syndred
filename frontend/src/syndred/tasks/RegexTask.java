@@ -37,7 +37,8 @@ public class RegexTask extends Task {
 		Pattern pattern = Pattern.compile(parser.getGramma());
 		while(iterator.hasNext()){
 			Block b = iterator.next();
-			b.setInlineStyleRanges(new ArrayList<InlineStyleRange>());
+//			b.setInlineStyleRanges(new ArrayList<InlineStyleRange>());
+			b.setInlineStyleRanges(removeParseRanges(b.getInlineStyleRanges()));
 			Matcher matcher = pattern.matcher(b.getText());
 			List<InlineStyleRange> findings = new ArrayList<InlineStyleRange>();
 			while(matcher.find()){
@@ -63,12 +64,24 @@ public class RegexTask extends Task {
 		// Kontrollausgabe in json-Datei
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			mapper.writeValue(new File("test/regexReturn.json"), state);
+			mapper.writerWithDefaultPrettyPrinter().writeValue(new File("test/regexReturn.json"), state);
+//			mapper.writeValue(new File("test/regexReturn.json"), state);
 		} catch (IOException e) {
 			System.out.println("JSON-Generator-Error");
 			e.printStackTrace();
 		}
 		return state;
+	}
+
+	private List<InlineStyleRange> removeParseRanges(List<InlineStyleRange> inlineStyleRanges) {
+		Iterator<InlineStyleRange> iterator = inlineStyleRanges.iterator();
+		while(iterator.hasNext()){
+			InlineStyleRange range = iterator.next();
+			if(range.getStyle().equals("success") || range.getStyle().equals("error")){
+				iterator.remove();
+			}
+		}
+		return inlineStyleRanges;
 	}
 
 }

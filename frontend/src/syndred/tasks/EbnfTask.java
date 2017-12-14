@@ -160,12 +160,12 @@ private Block parseUnknownBlock(Block block) {
 	} else if(i == text.length && !ebnfParser.parsed){
 		InlineStyleRange successRange = new InlineStyleRange();
 		successRange.setOffset(0);
-		successRange.setLength(i-1);
+		successRange.setLength(i);
 		successRange.setStyle("success");
 		block.addInlineStyleRange(successRange);
 		InlineStyleRange errorRange = new InlineStyleRange();
-		errorRange.setOffset(i);
-		errorRange.setLength(text.length-i);
+		errorRange.setOffset(i+1);
+		errorRange.setLength(text.length-i+1);
 		errorRange.setStyle("error");
 		block.addInlineStyleRange(errorRange);
 	}
