@@ -92,4 +92,15 @@ public abstract class Task implements Callable<Parser> {
 		}
 		return invers;
 	}
+	
+	public List<InlineStyleRange> removeParseRanges(List<InlineStyleRange> inlineStyleRanges) {
+		Iterator<InlineStyleRange> iterator = inlineStyleRanges.iterator();
+		while(iterator.hasNext()){
+			InlineStyleRange range = iterator.next();
+			if(range.getStyle().equals("success") || range.getStyle().equals("error")){
+				iterator.remove();
+			}
+		}
+		return inlineStyleRanges;
+	}
 }

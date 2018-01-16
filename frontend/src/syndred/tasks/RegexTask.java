@@ -11,15 +11,12 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import syndred.entities.Block;
 import syndred.entities.InlineStyleRange;
 import syndred.entities.Parser;
 import syndred.entities.RawDraftContentState;
-import texts.RichChar;
 
 public class RegexTask extends Task {
 
@@ -73,15 +70,5 @@ public class RegexTask extends Task {
 		return state;
 	}
 
-	private List<InlineStyleRange> removeParseRanges(List<InlineStyleRange> inlineStyleRanges) {
-		Iterator<InlineStyleRange> iterator = inlineStyleRanges.iterator();
-		while(iterator.hasNext()){
-			InlineStyleRange range = iterator.next();
-			if(range.getStyle().equals("success") || range.getStyle().equals("error")){
-				iterator.remove();
-			}
-		}
-		return inlineStyleRanges;
-	}
 
 }
