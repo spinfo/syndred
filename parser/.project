@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<projectDescription>
-	<name>syndred-parser</name>
-	<natures>
-		<nature>gpcp_plugin_bk.projectNature</nature>
-	</natures>
-</projectDescription>
