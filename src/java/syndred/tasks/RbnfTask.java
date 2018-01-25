@@ -30,7 +30,7 @@ public class RbnfTask extends Task {
 
 		ebnf = new Thread(() -> {
 			while (!Thread.interrupted())
-				Ebnf.parse(Ebnf.startsymbol);
+				Ebnf.root = Ebnf.syntaxDrivenParse();
 		});
 
 		shared = new Shared();
