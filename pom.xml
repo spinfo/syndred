@@ -82,7 +82,7 @@
 							<outputDirectory>${basedir}/target/classes/CP</outputDirectory>
 							<resources>
 								<resource>
-									<directory>vendor/lib/CP</directory>
+									<directory>vendor/bin/CP</directory>
 								</resource>
 							</resources>
 						</configuration>
