@@ -73,7 +73,7 @@ public class RbnfTask extends Task {
 		}
 
 		if (Shared.maxPosInParse >= 0)
-			DraftState.add(state, "error", Shared.maxPosInParse, next.size() - Shared.maxPosInParse);
+			DraftState.add(state, "Error", Shared.maxPosInParse, next.size() - Shared.maxPosInParse);
 
 		return state;
 	}
