@@ -63,7 +63,7 @@ public class RbnfTask extends Task {
 		sharedText.setRichChars(next);
 
 		if (position < next.size())
-			DraftState.del(state, "ERROR");
+			DraftState.del(state, "Error");
 
 		try {
 			while (Shared.maxPosInParse < 0 && (shared.backTrack || sharedText.getParsePos() < sharedText.getTextLen()))
@@ -73,7 +73,7 @@ public class RbnfTask extends Task {
 		}
 
 		if (Shared.maxPosInParse >= 0)
-			DraftState.add(state, "ERROR", Shared.maxPosInParse, next.size() - Shared.maxPosInParse);
+			DraftState.add(state, "error", Shared.maxPosInParse, next.size() - Shared.maxPosInParse);
 
 		return state;
 	}
@@ -94,12 +94,12 @@ public class RbnfTask extends Task {
 					char[] style = range.getStyle().toCharArray();
 
 					switch (range.getStyle()) {
-					case "BOLD":
+					case "Bold":
 						rch.weight = style;
 						break;
 
-					case "ITALIC":
-					case "UNDERLINE":
+					case "Italic":
+					case "Underline":
 						rch.style = style;
 						break;
 					}

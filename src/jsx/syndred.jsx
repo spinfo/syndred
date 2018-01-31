@@ -1,4 +1,3 @@
-import cuid from 'cuid';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import SockJS from 'sockjs-client';
@@ -16,6 +15,7 @@ class Syndred extends React.Component {
 			ready: false,
 			socket: Stomp.over(new SockJS('/websocket'))
 		};
+		this.state.socket.debug = null;
 	}
 
 	componentDidMount() {
@@ -28,7 +28,9 @@ class Syndred extends React.Component {
 		}
 
 	componentWillMount() {
-		if (!location.hash) location.hash = cuid();
+		if (!location.hash)
+			location.hash = Math.random().toString(36).substring(2);
+
 		window.dest = '/syndred/' + location.hash;
 	}
 
@@ -51,6 +53,7 @@ class Syndred extends React.Component {
 			</div>
 		);
 	}
+
 }
 
 ReactDOM.render(<Syndred />, document.getElementById('syndred'));

@@ -3,6 +3,15 @@ import Textarea from 'react-textarea-autosize';
 
 export default class Parser extends React.Component {
 
+	get parserMap() {
+		return {
+			abnf: 'Augmented Backus–Naur form (ABNF)',
+			rbnf: 'Rich Backus–Naur form (RBNF)',
+			regex: 'Regular Expressions',
+			test: 'Simple echo test'
+		};
+	}
+
 	constructor(props) {
 		super(props);
 
@@ -34,11 +43,9 @@ export default class Parser extends React.Component {
 					<legend>Parser</legend>
 					{this.state.error && this.renderError()}
 
-					<div className={
-						'form-group'
+					<div className={'form-group'
 						+ (this.state.error ? ' has-error' : '')
-						+ (this.state.running ?' has-success' : '')
-					}>
+						+ (this.state.running ?' has-success' : '')}>
 						<label className='col-lg-2 control-label'>
 							Gramma
 						</label>
@@ -47,18 +54,17 @@ export default class Parser extends React.Component {
 								className='form-control'
 								onChange={(event) => this.setState({
 									grammar: event.target.value
-								}, () => console.log(event))}
+								})}
 								minRows={5}
+								style={{ resize: 'vertical' }}
 								value={this.state.grammar}
 							/>
 						</div>
 					</div>
 
-					<div className={
-						'form-group'
+					<div className={'form-group'
 						+ (this.state.error ? ' has-error' : '')
-						+ (this.state.running ?' has-success' : '')
-					}>
+						+ (this.state.running ?' has-success' : '')}>
 						<label className='col-lg-2 control-label'>
 							Type
 						</label>
@@ -70,35 +76,26 @@ export default class Parser extends React.Component {
 									name: event.target.value
 								})}
 								value={this.state.name}>
-								<option value='abnf'>
-									Augmented Backus–Naur form (ABNF)
-								</option>
-								<option value='rbnf'>
-									Rich Backus–Naur form (RBNF)
-								</option>
-								<option value='regex'>
-									Regular Expressions
-								</option>
-								<option value='test'>
-									Simple echo test
-								</option>
+								{Object.keys(this.parserMap).map((name) => (
+									<option key={name} value={name}>
+										{this.parserMap[name]}
+									</option>
+								))}
 							</select>
 						</div>
 					</div>
 
-					<div className={
-						'form-group'
+					<div className={'form-group'
 						+ (this.state.error ? ' has-error' : '')
-						+ (this.state.running ?' has-success' : '')
-					}>
+						+ (this.state.running ?' has-success' : '')}>
 						<label className='col-lg-2 control-label'>
-						Status
+							Status
 						</label>
 						<div className='col-lg-4'>
 							<button
 								className='btn btn-block btn-primary'
 								onClick={(event) => this.setParser(event)}
-								type='submit' >
+								type='submit'>
 								Apply
 							</button>
 						</div>
@@ -115,7 +112,7 @@ export default class Parser extends React.Component {
 					type='button'
 					className='close'
 					onClick={() => this.setState({ error: '' })}>
-				&times;
+					<i className='fa fa-times' />
 				</button>
 				{this.state.error}
 			</div>
