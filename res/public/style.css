@@ -1,21 +1,69 @@
-div[role="textbox"] {
-	background-color: white;
-	border-radius: 5px;
-	box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-	margin-top: 25px;
-	min-height: 400px;
-	padding: 10px;
-	transition: 50ms;
-}
-div[role="textbox"][contenteditable="false"] {
-	background-color: rgba(0,0,0,0.4);
-	pointer-events: none;
-}
+@import url("https://cdnjs.cloudflare.com/ajax/libs/draft-js/0.10.5/Draft.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/paper/bootstrap.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
 
 @keyframes spinner {
 	from { transform: rotate(0deg); }
 	to { transform: rotate(359deg); }
 }
+
+.DraftEditor-root {
+	bottom: 0;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.DraftEditor-root div[role="textbox"] {
+	background-color: white;
+	border-radius: 5px;
+	box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+	min-height: 400px;
+	overflow-y: scroll;
+	padding: 10px;
+}
+
+.disabled {
+	pointer-events: none;
+	position: relative;
+}
+.disabled::before {
+	background-color: rgba(0, 0, 0, 0.25);
+	bottom: 0;
+	content: '';
+	display: block;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 5;
+}
+
+.editor-menu {
+	margin-bottom: 25px;
+}
+.editor-menu > * + * {
+	margin-left: 25px;
+}
+
+.editor-root {
+	flex-grow: 1;
+	position: relative;
+}
+
+.flex-column {
+	display: flex;
+	flex-flow: column;
+	height: 100%;
+	margin: 0;
+	width: 100%;
+}
+
+.form-control.inline {
+	display: inline-block;
+	width: auto;
+}
+
 .spinner {
 	animation: spinner 2s linear infinite;
 	height: 100px;
