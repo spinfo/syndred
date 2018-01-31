@@ -6,8 +6,8 @@
     "build": "mkdir -p target/javascript && babel src/jsx -d target/javascript",
     "bundle": "browserify target/javascript/syndred.js -o res/public/script.js",
     "minify": "uglifyjs -c -o res/public/script.js -- res/public/script.js",
-    "start": "watch 'npm run build && npm run bundle' src/jsx",
-    "watch": "npm run build && npm run bundle && npm run minify"
+    "package": "npm run build && npm run bundle && npm run minify",
+    "start": "watch 'npm run build && npm run bundle' src/jsx"
   },
   "dependencies": {
     "@stomp/stompjs": "^4.0.1",
