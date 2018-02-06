@@ -112,7 +112,7 @@ export default class Parser extends React.Component {
 					type='button'
 					className='close'
 					onClick={() => this.setState({ error: '' })}>
-					<i className='fa fa-times' />
+					&times;
 				</button>
 				{this.state.error}
 			</div>
