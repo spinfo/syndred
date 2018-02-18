@@ -26,7 +26,7 @@ public class RichChar {
 		equals = equals && Arrays.equals(style, rch.style);
 		equals = equals && Arrays.equals(typeface, rch.typeface);
 		equals = equals && Arrays.equals(weight, rch.weight);
-		
+
 		return equals;
 	}
 
@@ -52,7 +52,7 @@ public class RichChar {
 
 	private boolean match(char[] java, char[] cp) {
 		return java == null || java.length == 0 || cp == null || cp.length == 0 ? false
-				: Arrays.equals(Arrays.copyOfRange(cp, 0, cp.length - 1), java);		
+				: Arrays.equals(Arrays.copyOfRange(cp, 0, cp.length - 1), java);
 	}
-	
+
 }
