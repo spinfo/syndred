@@ -22,9 +22,9 @@ class Syndred extends React.Component {
 		window.setTimeout(() => this.componentDidMount(), 2500);
 
 		if (!this.state.ready)
-		this.state.socket.connect({ instance: location.hash },
-			() => this.setState({ ready: true }),
-			() => this.setState({ ready: false }));
+			this.state.socket.connect({ instance: location.hash },
+				() => this.setState({ ready: true }),
+				() => this.setState({ ready: false }));
 		}
 
 	componentWillMount() {
@@ -32,16 +32,23 @@ class Syndred extends React.Component {
 			location.hash = Math.random().toString(36).substring(2);
 
 		window.dest = '/syndred/' + location.hash;
+		window.onhashchange = () => window.location.reload();
 	}
 
 	render() {
 		return this.state.ready ? (
 			<div className='row'>
 				<div className='col-md-5'>
-					<Parser socket={this.state.socket} />
+					<Parser
+						run={() => this.editor.parse()}
+						socket={this.state.socket}
+					/>
 				</div>
 				<div className='col-md-7'>
-					<Editor socket={this.state.socket} />
+					<Editor
+						ref={(ref) => this.editor = ref}
+						socket={this.state.socket}
+					/>
 				</div>
 			</div>
 		) : (

@@ -26,14 +26,14 @@ export default class Parser extends React.Component {
 
 	componentDidMount() {
 		this.props.socket.subscribe(`${this.dest}pull`,
-			(message) => this.setState(JSON.parse(message.body))
-		);
+			(message) => this.setState(JSON.parse(message.body),
+				() => this.props.run()));
 	}
 
 	setParser(event) {
 		event.preventDefault();
 		this.props.socket
-			.send(`${this.dest}push`, {}, JSON.stringify(this.state));
+			.send(`${this.dest}push`, { }, JSON.stringify(this.state));
 	}
 
 	render() {
@@ -94,8 +94,7 @@ export default class Parser extends React.Component {
 						<div className='col-lg-4'>
 							<button
 								className='btn btn-block btn-primary'
-								onClick={(event) => this.setParser(event)}
-								type='submit'>
+								onClick={(event) => this.setParser(event)}>
 								Apply
 							</button>
 						</div>

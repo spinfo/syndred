@@ -12,7 +12,8 @@ export default class Editor extends React.Component {
 			'Red': { color: 'red' },
 			'Yellow': { color: 'yellow '},
 			'Green': { color: 'green' },
-			'Blue': { color: 'blue' }
+			'Blue': { color: 'blue' },
+			'White': { color: 'white' }
 		};
 	}
 
@@ -60,7 +61,8 @@ export default class Editor extends React.Component {
 		this.state = {
 			bounds: null,
 			editor: Draft.EditorState.createEmpty(),
-			fullscreen: false
+			fullscreen: false,
+			tree: null
 		};
 	}
 
@@ -75,13 +77,13 @@ export default class Editor extends React.Component {
 
 				let cursor = this.state.editor.getSelection();
 				let editor = Draft.EditorState
-					.push(this.state.editor, Draft.convertFromRaw(data));
+				.push(this.state.editor, Draft.convertFromRaw(data));
 
 				if (cursor.getHasFocus())
-					editor = Draft.EditorState.forceSelection(editor, cursor);
+				editor = Draft.EditorState.forceSelection(editor, cursor);
 
-				this.setState({ editor }, () =>
-					this.screen.classList.remove('disabled'));
+				this.setState({ editor, tree: data.parseTree || null },
+					() => this.screen.classList.remove('disabled'));
 			}
 		);
 	}
@@ -99,10 +101,11 @@ export default class Editor extends React.Component {
 	}
 
 	parse() {
+		console.log('parse', Date.now())
 		let data = Draft.convertToRaw(this.state.editor.getCurrentContent());
 
 		this.screen.classList.add('disabled');
-		this.props.socket.send(`${this.dest}push`, {}, JSON.stringify(data));
+		this.props.socket.send(`${this.dest}push`, { }, JSON.stringify(data));
 	}
 
 	range(name, map) {
@@ -120,9 +123,10 @@ export default class Editor extends React.Component {
 		let height = (top) => `${window.innerHeight - top - 25}px`;
 
 		return (
-			<div className='well flex-column'
+			<div className='well flex-column disabled'
 				ref={(element) => this.screen = ReactDOM.findDOMNode(element)}>
 				<div className='editor-menu'>
+					{this.renderTree()}
 					{this.renderFullscreen()}
 					{this.renderStyles()}
 					{this.renderSelect('Size', this.sizeMap)}
@@ -195,6 +199,10 @@ export default class Editor extends React.Component {
 				))}
 			</div>
 		);
+	}
+
+	renderTree() {
+		console.log(this.state.tree);
 	}
 
 }
