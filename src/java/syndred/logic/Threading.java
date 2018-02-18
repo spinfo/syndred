@@ -14,6 +14,7 @@ import syndred.entities.Parser;
 import syndred.entities.RawDraftContentState;
 import syndred.tasks.EchoTask;
 import syndred.tasks.RbnfTask;
+import syndred.tasks.RegexTask;
 
 public class Threading {
 
@@ -49,7 +50,7 @@ public class Threading {
 	public static void disconnect(String instance) {
 		Future<Parser> future = futures.remove(instance);
 
-		if (future != null && !future.isDone() && !future.isCancelled())
+		if (future != null && !future.isCancelled())
 			future.cancel(true);
 
 		input.remove(instance);
@@ -73,7 +74,7 @@ public class Threading {
 	public static Parser run(String instance, Parser parser) throws InterruptedException, ExecutionException {
 		Future<Parser> future = futures.get(instance);
 
-		if (future != null && !future.isDone() && !future.isCancelled())
+		if (future != null && !future.isCancelled())
 			future.cancel(true);
 
 		parser.setError("");
@@ -90,10 +91,9 @@ public class Threading {
 				future = executorService.submit(new RbnfTask(input.get(instance), output.get(instance), parser));
 				break;
 
-			// case "regex":
-			// future = executorService.submit(new RegexTask(input.get(instance),
-			// output.get(instance), parser));
-			// break;
+			case "regex":
+				future = executorService.submit(new RegexTask(input.get(instance), output.get(instance), parser));
+				break;
 
 			case "test":
 				future = executorService.submit(new EchoTask(input.get(instance), output.get(instance), parser));

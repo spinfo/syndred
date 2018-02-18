@@ -16,6 +16,10 @@ public class EchoTask extends Task {
 	}
 
 	@Override
+	public void close() throws Exception {
+	}
+
+	@Override
 	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
 		return state;
 	}

@@ -17,6 +17,11 @@ public class AbnfTask extends Task {
 	}
 
 	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
 		// TODO Auto-generated method stub
 		return null;

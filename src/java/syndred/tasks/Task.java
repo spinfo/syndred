@@ -9,7 +9,7 @@ import java.util.function.Function;
 import syndred.entities.Parser;
 import syndred.entities.RawDraftContentState;
 
-public abstract class Task implements Callable<Parser> {
+public abstract class Task implements AutoCloseable, Callable<Parser> {
 
 	private final BlockingQueue<RawDraftContentState> input;
 
@@ -33,14 +33,20 @@ public abstract class Task implements Callable<Parser> {
 				Exception error = output.apply(parse(input.take()));
 				if (error != null)
 					throw error;
-			} catch (Exception error) {
-				parser.setRunning(false);
-				parser.setError(error.getMessage());
+			} catch (Throwable thrown) {
+				parser.setError(thrown.getMessage());
 				break;
 			}
 		}
 
+		try {
+			this.close();
+		} catch (Throwable thrown) {
+			parser.setError(thrown.getMessage());
+		}
+
+		parser.setRunning(false);
 		return parser;
 	}
-	
+
 }

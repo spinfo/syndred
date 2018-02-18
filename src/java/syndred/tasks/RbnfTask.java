@@ -17,6 +17,7 @@ import syndred.logic.DraftState;
 import texts.RichChar;
 import texts.Shared;
 import texts.Texts;
+import tree.Node;
 
 public class RbnfTask extends Task {
 
@@ -24,17 +25,28 @@ public class RbnfTask extends Task {
 
 	private Shared shared;
 
+	private boolean success;
+
 	public RbnfTask(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
 			Parser parser) throws ExecutionException {
 		super(input, output, parser);
 
 		ebnf = new Thread(() -> {
-			while (!Thread.interrupted())
-				Ebnf.root = Ebnf.syntaxDrivenParse();
+			while (!Thread.interrupted()) {
+				try {
+					Ebnf.root = Ebnf.syntaxDrivenParse();
+					success = true;
+
+					while (success)
+						Thread.sleep(100);
+				} catch (Throwable thrown) {
+				}
+			}
 		});
 
 		shared = new Shared();
 		shared.setGrammar(parser.getGrammar().chars().mapToObj(i -> (char) i).collect(Collectors.toList()));
+		shared.setRegex("\\u00FC:\n\\u00FD:".chars().mapToObj(i -> (char) i).collect(Collectors.toList()));
 
 		try {
 			Ebnf.init(shared);
@@ -45,7 +57,16 @@ public class RbnfTask extends Task {
 	}
 
 	@Override
+	public void close() {
+		while (!ebnf.isInterrupted() || ebnf.isAlive())
+			ebnf.interrupt();
+	}
+
+	@Override
 	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
+		DraftState.del(state, "Error");
+		DraftState.del(state, "Success");
+
 		Texts sharedText = shared.getSharedText();
 		List<RichChar> next = getRichChars(state);
 		List<RichChar> prev = sharedText.getRichChars();
@@ -58,23 +79,23 @@ public class RbnfTask extends Task {
 		}
 
 		Shared.maxPosInParse = -1;
-		shared.backTrack = position < prev.size();
-		sharedText.setParsePos(position);
+		sharedText.setParsePos(0);
 		sharedText.setRichChars(next);
-
-		if (position < next.size())
-			DraftState.del(state, "Error");
+		success = false;
 
 		try {
-			while (Shared.maxPosInParse < 0 && (shared.backTrack || sharedText.getParsePos() < sharedText.getTextLen()))
+			while (!success && Shared.maxPosInParse < 0 && sharedText.getParsePos() < sharedText.getTextLen())
 				Thread.sleep(100);
-		} catch (InterruptedException error) {
-			throw new ParseException(error.getMessage(), Shared.maxPosInParse);
+		} catch (InterruptedException e) {
+			return state;
 		}
 
 		if (Shared.maxPosInParse >= 0)
 			DraftState.add(state, "Error", Shared.maxPosInParse, next.size() - Shared.maxPosInParse);
+		else if (success)
+			DraftState.add(state, "Success", 0, next.size());
 
+		state.setParseTree(Node.resultString);
 		return state;
 	}
 
@@ -111,5 +132,4 @@ public class RbnfTask extends Task {
 
 		return chars;
 	}
-
 }

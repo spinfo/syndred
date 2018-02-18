@@ -20,16 +20,17 @@ public class DraftState {
 				break;
 
 			blockLen = block.getText().length();
-			
+			range = new InlineStyleRange();
+			ranges = block.getInlineStyleRanges();
+
 			if (offset < position + blockLen) {
-				range = new InlineStyleRange();
-				range.setLength(Math.min(length + offset - position, blockLen));
-				range.setOffset(Math.max(offset - position, 0));
+				range.setLength(Math.min(blockLen, length));
+				range.setOffset(Math.max(0, offset - position));
 				range.setStyle(style);
 
-				ranges = block.getInlineStyleRanges();
 				ranges.add(range);
 				block.setInlineStyleRanges(ranges);
+				length -= range.getLength();
 			}
 
 			position += blockLen;
@@ -40,11 +41,6 @@ public class DraftState {
 		for (Block block : state.getBlocks())
 			block.setInlineStyleRanges(block.getInlineStyleRanges().stream().filter(i -> !i.getStyle().equals(style))
 					.collect(Collectors.toList()));
-	}
-
-	public static void set(RawDraftContentState state, String style, int offset, int length) {
-		del(state, style);
-		add(state, style, offset, length);
 	}
 
 }
