@@ -12,12 +12,8 @@ import java.util.function.Function;
 
 import syndred.entities.Parser;
 import syndred.entities.RawDraftContentState;
-import syndred.tasks.EbnfTask;
 import syndred.tasks.EchoTask;
-<<<<<<< ours:frontend/src/syndred/logic/Threading.java
-=======
 import syndred.tasks.RbnfTask;
->>>>>>> theirs:src/java/syndred/logic/Threading.java
 import syndred.tasks.RegexTask;
 
 public class Threading {
@@ -78,24 +74,8 @@ public class Threading {
 	public static Parser run(String instance, Parser parser) throws InterruptedException, ExecutionException {
 		Future<Parser> future = futures.get(instance);
 
-<<<<<<< ours:frontend/src/syndred/logic/Threading.java
-		case "ebnf":
-			future = executorService.submit(new EbnfTask(input.get(instance), output.get(instance), parser));
-			break;
-
-		case "regex":
-			future = executorService.submit(new RegexTask(input.get(instance), output.get(instance), parser));
-//			parser.setError("Not implemented");
-//			parser.setRunning(false);
-			break;
-
-		case "test":
-			future = executorService.submit(new EchoTask(input.get(instance), output.get(instance), parser));
-			break;
-=======
 		if (future != null && !future.isCancelled())
 			future.cancel(true);
->>>>>>> theirs:src/java/syndred/logic/Threading.java
 
 		parser.setError("");
 		parser.setRunning(false);

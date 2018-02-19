@@ -2,7 +2,6 @@
 package syndred.entities;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -105,18 +104,5 @@ public class Block implements Serializable {
 	public void setData(Data data) {
 		this.data = data;
 	}
-	
-	public void addInlineStyleRange(InlineStyleRange range){
-		if(inlineStyleRanges == null){
-			inlineStyleRanges = new ArrayList<InlineStyleRange>();
-		}
-		inlineStyleRanges.add(range);
-	}
-	
-	public void addInlineStyleRanges(List<InlineStyleRange> ranges){
-		if(inlineStyleRanges == null){
-			inlineStyleRanges = new ArrayList<InlineStyleRange>();
-		}
-		inlineStyleRanges.addAll(ranges);
-	}
+
 }

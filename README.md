@@ -1,8 +1,6 @@
 # Syndred
 
-A Syntax-Driven Editor 
-
-Wiki: https://github.com/spinfo/syndred/wiki
+A Syntax-Driven Editor for Lexical Resources
 
 
 ## Theoretischer Rahmen
