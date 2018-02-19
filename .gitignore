@@ -2,6 +2,8 @@
 .recommenders
 .settings
 
-frontend/target/
+package-lock.json
+res/public/script.js*
 
-parser/src/**/*.lst
+node_modules/
+target/

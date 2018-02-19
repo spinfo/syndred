@@ -27,15 +27,15 @@ Auf Seite der Clients wird das auf React basierende Editor-Framework [DraftJS](h
 
 ### Installation
 
-Die Anwendung nutzt [Maven](https://maven.apache.org) zur Auflösung externer Abhängigkeiten und kann sowohl innerhalb der [Eclipse IDE](https://www.eclipse.org) als Java-Applikation gestartet werden, als auch mittels Maven zu einer monolithischen JAR paketiert werden. Hierzu muss zunächst dieses Repository geclont werden und der frontend-Pfad entweder in Eclipse als bestehendes Projekt importiert oder aus diesem heraus die Maven Paketierung aufgerufen werden.
+Die Anwendung nutzt [Maven](https://maven.apache.org) zur Auflösung externer Java-Abhängigkeiten bzw. [NPM](https://www.npmjs.com) zur Auflösung externer JavaScript/nodeJS-Abhängigkeiten und kann sowohl innerhalb der [Eclipse IDE](https://www.eclipse.org) als Java-Applikation gestartet werden, als auch mittels Maven zu einer monolithischen JAR paketiert werden. Hierzu muss zunächst dieses Repository geclont werden und mittels NPM das Frontend transpiliert werden woraufhin das Projekt in Eclipse importiert oder die Maven Paketierung aufgerufen werden kann.
 
-Um die Paketierung mittels Maven anzustoßen muss sichergestellt werden, dass die Kommandozeileninterfaces `git` und `mvn` installiert sind, woraufhin folgende Schritte vorgenommen werden müssen:
+Um die Paketierung mittels Maven und NPM anzustoßen muss sichergestellt werden, dass die Kommandozeileninterfaces `git`, `mvn` und `npm` installiert sind, woraufhin folgende Schritte vorgenommen werden müssen:
 
 	git clone https://github.com/spinfo/syndred
-	cd syndred/frontend
-	mvn clean
-	mvn install
+	cd syndred
+	npm install
+	npm run package
+	mvn package
 	java -jar target/*.jar
 
 Wurde die Applikation korrekt gestartet, so ist das DraftJS-Webinterface auf Port 8080 des ausführenden Gerätes anzutreffen und in der Java-Konsole werden die Vorgänge des Parser ausgegeben.
-
