@@ -5,6 +5,8 @@ import screenfull from 'screenfull';
 
 import { debounce } from 'lodash';
 
+import Parsetree from './parsetree';
+
 export default class Editor extends React.Component {
 
 	get colorMap() {
@@ -62,7 +64,8 @@ export default class Editor extends React.Component {
 			bounds: null,
 			editor: Draft.EditorState.createEmpty(),
 			fullscreen: false,
-			tree: null
+			treeData: null,
+			treeView: false
 		};
 	}
 
@@ -77,12 +80,16 @@ export default class Editor extends React.Component {
 
 				let cursor = this.state.editor.getSelection();
 				let editor = Draft.EditorState
-				.push(this.state.editor, Draft.convertFromRaw(data));
+					.push(this.state.editor, Draft.convertFromRaw(data));
 
 				if (cursor.getHasFocus())
-				editor = Draft.EditorState.forceSelection(editor, cursor);
+					editor = Draft.EditorState.forceSelection(editor, cursor);
 
-				this.setState({ editor, tree: data.parseTree || null },
+				console.log('parseTree', data.parseTree);
+				let treeData = data.parseTree
+					? JSON.parse(data.parseTree) : null;
+
+				this.setState({ editor, treeData, treeView: false },
 					() => this.screen.classList.remove('disabled'));
 			}
 		);
@@ -101,7 +108,6 @@ export default class Editor extends React.Component {
 	}
 
 	parse() {
-		console.log('parse', Date.now())
 		let data = Draft.convertToRaw(this.state.editor.getCurrentContent());
 
 		this.screen.classList.add('disabled');
@@ -126,12 +132,12 @@ export default class Editor extends React.Component {
 			<div className='well flex-column disabled'
 				ref={(element) => this.screen = ReactDOM.findDOMNode(element)}>
 				<div className='editor-menu'>
-					{this.renderTree()}
 					{this.renderFullscreen()}
 					{this.renderStyles()}
 					{this.renderSelect('Size', this.sizeMap)}
 					{this.renderSelect('Font', this.fontMap)}
 					{this.renderSelect('Color', this.colorMap)}
+					{this.renderTree()}
 				</div>
 				<div className='editor-root'
 					ref={(element) => element && Object.assign(element.style, {
@@ -150,6 +156,13 @@ export default class Editor extends React.Component {
 						ref={(element) => this.editor = element}
 						spellCheck={false}
 					/>
+					{this.state.treeData && this.state.treeView && (
+						<Parsetree
+							canvasHeight={this.editor.editor.clientHeight}
+							canvasWidth={this.editor.editor.clientWidth}
+							treeData={this.state.treeData}
+						/>
+					)}
 				</div>
 			</div>
 		);
@@ -202,7 +215,16 @@ export default class Editor extends React.Component {
 	}
 
 	renderTree() {
-		console.log(this.state.tree);
+		let active = this.state.treeData && this.state.treeView;
+		let toggle = () => this.setState({ treeView: !this.state.treeView },
+			() => screenfull.toggle(this.screen));
+
+		return (
+			<button className={`btn btn-${active ? 'primary' : 'default'}`}
+				disabled={!this.state.treeData} onClick={() => toggle()}>
+				<i className='fa fa-code-fork' />
+			</button>
+		);
 	}
 
 }
