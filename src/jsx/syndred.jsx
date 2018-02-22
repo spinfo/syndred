@@ -25,7 +25,7 @@ class Syndred extends React.Component {
 			this.state.socket.connect({ instance: location.hash },
 				() => this.setState({ ready: true }),
 				() => this.setState({ ready: false }));
-		}
+	}
 
 	componentWillMount() {
 		if (!location.hash)
