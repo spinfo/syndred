@@ -70,6 +70,8 @@ export default class Editor extends React.Component {
 	}
 
 	componentDidMount() {
+		window.addEventListener('resize', () => this.forceUpdate());
+
 		screenfull.onchange(
 			() => this.setState({ fullscreen: screenfull.isFullscreen }));
 
@@ -94,6 +96,10 @@ export default class Editor extends React.Component {
 			}
 		);
 	}
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', () => this.forceUpdate());
+    }
 
 	cursor() {
 		let editor = this.state.editor;
@@ -126,7 +132,10 @@ export default class Editor extends React.Component {
 	}
 
 	render() {
-		let height = (top) => `${window.innerHeight - top - 25}px`;
+		let height = (top) => {
+			let height = window.innerHeight - top - 25;
+			return `${height >= 400 ? height : 400}px`;
+		};
 
 		return (
 			<div className='well flex-column disabled'
@@ -158,8 +167,7 @@ export default class Editor extends React.Component {
 					/>
 					{this.state.treeData && this.state.treeView && (
 						<Parsetree
-							canvasHeight={this.editor.editor.clientHeight}
-							canvasWidth={this.editor.editor.clientWidth}
+							canvas={this.editor.editor.getBoundingClientRect()}
 							treeData={this.state.treeData}
 						/>
 					)}
@@ -216,8 +224,7 @@ export default class Editor extends React.Component {
 
 	renderTree() {
 		let active = this.state.treeData && this.state.treeView;
-		let toggle = () => this.setState({ treeView: !this.state.treeView },
-			() => screenfull.toggle(this.screen));
+		let toggle = () => this.setState({ treeView: !this.state.treeView });
 
 		return (
 			<button className={`btn btn-${active ? 'primary' : 'default'}`}

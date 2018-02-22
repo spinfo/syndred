@@ -1,36 +1,41 @@
 import * as d3 from 'd3';
 import React from 'react';
 
+import { drag } from 'd3-drag';
+
 export default class Parsetree extends React.Component {
 
 	constructor(props) {
         super(props);
 
+        this.depthset = 100;
         this.duration = 500;
-        this.depthset = 50;
     }
 
     componentDidMount() {
-        this.canvas = d3.select(this.svg).append('g')
-            .attr('transform', `translate(0, ${this.depthset})`);
+        this.root = d3.select(this.svg).append('g')
+            .attr('transform', `translate(0, ${this.depthset})`)
+            .attr('data-y', this.depthset);
 
-        this.root = d3.hierarchy(this.props.treeData, (d) => d.children);
-        this.root.children.forEach((d) => this.handleCollapse(d));
-        this.root.x0 = 0, this.root.y0 = 0;
-    }
+        this.root.call(d3.drag().on('drag', () => {
+            let x = (parseFloat(this.root.attr('data-x')) || 0) + d3.event.dx;
+            let y = (parseFloat(this.root.attr('data-y')) || 0) + d3.event.dy;
 
-    componentDidUpdate() {
-        console.log('that', this.canvas)
-        console.log('full', this.props.canvasWidth / 2)
-        console.log('elem', this.canvas.node().getBBox().width)
-        console.log('bbox', this.canvas.node().getBBox())
-        console.log('cbox', this.canvas.node().getBoundingClientRect())
+            this.root.attr('transform', `translate(${x}, ${y})`);
+            this.root.attr('data-x', x);
+            this.root.attr('data-y', y);
+        }));
 
-        // let x = this.props.canvasWidth / 2 - this.canvas.node().getBBox().width / 2;
-        // console.log('x', x)
+        let rect = this.root.node().getBoundingClientRect();
 
-        this.canvas.attr('transform', `translate(0, ${this.depthset})`);
-        this.rend3r(this.root);
+        this.root.x = rect.x - this.props.canvas.x;
+        this.root.y = rect.y - this.props.canvas.y;
+
+        this.tree = d3.hierarchy(this.props.treeData, (d) => d.children);
+        this.tree.children.forEach((d) => this.handleCollapse(d));
+        this.tree.x0 = 0, this.tree.y0 = 0;
+
+        this.rend3r(this.tree);
     }
 
     handleClick(d) {
@@ -42,8 +47,7 @@ export default class Parsetree extends React.Component {
             d._children = null;
         }
 
-        // this.rend3r(d);
-        this.forceUpdate();
+        this.rend3r(d);
     }
 
     handleCollapse(d) {
@@ -65,8 +69,8 @@ export default class Parsetree extends React.Component {
 
     rend3r(ds) {
         // Assigns the x and y position for the nodes
-        let treeData = d3.tree()
-            .size([this.props.canvasHeight, this.props.canvasWidth])(this.root);
+        let treeSize = [this.props.canvas.height, this.props.canvas.width];
+        let treeData = d3.tree().size(treeSize)(this.tree);
 
         // Compute the new tree layout.
         let nodes = treeData.descendants();
@@ -76,7 +80,7 @@ export default class Parsetree extends React.Component {
         nodes.forEach((d) => d.y = d.depth * this.depthset);
 
         // Update the nodes...
-        let node = this.canvas
+        let node = this.root
             .selectAll('g.node')
             .data(nodes, (d) =>
                 d.id || (d.id = Math.random().toString(36).substring(2)));
@@ -141,7 +145,7 @@ export default class Parsetree extends React.Component {
         nodeExit.select('text').style('fill-opacity', 1e-6);
 
         // Update the links...
-        let link = this.canvas.selectAll('path.link').data(links, (d) => d.id);
+        let link = this.root.selectAll('path.link').data(links, (d) => d.id);
 
         // Enter any new links at the parent's previous position.
         let linkEnter = link.enter()
