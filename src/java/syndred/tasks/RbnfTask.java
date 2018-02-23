@@ -114,16 +114,32 @@ public class RbnfTask extends Task {
 
 					char[] style = range.getStyle().toCharArray();
 
-					switch (range.getStyle()) {
-					case "Bold":
-						rch.weight = style;
-						break;
+					if (!range.getStyle().matches("\\d+"))
+						switch (range.getStyle()) {
+						case "Red":
+						case "Yellow":
+						case "Green":
+						case "Blue":
+							rch.color = style;
+							break;
 
-					case "Italic":
-					case "Underline":
-						rch.style = style;
-						break;
-					}
+						case "Italic":
+						case "Underline":
+							rch.style = style;
+							break;
+
+						case "Arial":
+						case "Courier":
+						case "Times":
+							rch.typeface = style;
+							break;
+
+						case "Bold":
+							rch.weight = style;
+							break;
+						}
+					else
+						rch.size = style;
 				}
 
 				chars.add(rch);

@@ -14,8 +14,7 @@ export default class Editor extends React.Component {
 			'Red': { color: 'red' },
 			'Yellow': { color: 'yellow '},
 			'Green': { color: 'green' },
-			'Blue': { color: 'blue' },
-			'White': { color: 'white' }
+			'Blue': { color: 'blue' }
 		};
 	}
 
@@ -36,14 +35,14 @@ export default class Editor extends React.Component {
 
 	get sizeMap() {
 		return {
-			'6pt': { fontSize: '6pt' },
-			'8pt': { fontSize: '8pt' },
-			'10pt': { fontSize: '10pt' },
-			'12pt': { fontSize: '12pt' },
-			'14pt': { fontSize: '14pt' },
-			'16pt': { fontSize: '16pt' },
-			'20pt': { fontSize: '20pt' },
-			'24pt': { fontSize: '24pt' }
+			'6': { fontSize: '6pt' },
+			'8': { fontSize: '8pt' },
+			'10': { fontSize: '10pt' },
+			'12': { fontSize: '12pt' },
+			'14': { fontSize: '14pt' },
+			'16': { fontSize: '16pt' },
+			'20': { fontSize: '20pt' },
+			'24': { fontSize: '24pt' }
 		};
 	}
 
