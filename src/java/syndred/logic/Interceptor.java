@@ -1,20 +1,20 @@
 package syndred.logic;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
-
-import syndred.entities.RawDraftContentState;
 
 public class Interceptor extends ChannelInterceptorAdapter {
 
@@ -23,41 +23,26 @@ public class Interceptor extends ChannelInterceptorAdapter {
 	@Override
 	public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
 		StompHeaderAccessor sha = StompHeaderAccessor.wrap(message);
+		String id, session = sha.getSessionId();
 
 		if (sha.getCommand() != null) {
-			String instance;
-			String session = sha.getSessionId();
-
 			switch (sha.getCommand()) {
 			case CONNECT:
-				instance = sha.getFirstNativeHeader("instance");
-
-				Threading.connect(instance);
-				mapping.put(session, instance);
+				id = sha.getFirstNativeHeader("id");
+				Threading.connect(id);
+				mapping.put(session, id);
 
 				break;
 			case DISCONNECT:
-				instance = mapping.get(session);
-
+				id = mapping.get(session);
 				mapping.remove(session);
-				if (!mapping.containsValue(instance))
-					Threading.disconnect(instance);
+				if (!mapping.containsValue(id))
+					Threading.disconnect(id);
 
 				break;
 			case SUBSCRIBE:
-				instance = mapping.get(session);
-
-				if (sha.getDestination().equals("/syndred/" + instance + "/editor/pull")) {
-					SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-					headers.setSessionAttributes(sha.getSessionAttributes());
-					headers.setSubscriptionId(sha.getSubscriptionId());
-					headers.setSessionId(sha.getSessionId());
-
-					SimpMessagingTemplate smt = new SimpMessagingTemplate(channel);
-					smt.setMessageConverter(new MappingJackson2MessageConverter());
-
-					Threading.callback(instance, callback(instance, headers.getMessageHeaders(), smt));
-				}
+				id = mapping.get(session);
+				callback(id, channel, sha);
 
 				break;
 			default:
@@ -66,19 +51,39 @@ public class Interceptor extends ChannelInterceptorAdapter {
 		}
 	}
 
-	private Function<RawDraftContentState, Exception> callback(String instance, MessageHeaders headers,
-			SimpMessagingTemplate smt) {
-		return new Function<RawDraftContentState, Exception>() {
+	private void callback(String id, MessageChannel channel, StompHeaderAccessor sha) {
+		Class<?> key = null;
+		SubscribeMapping subscription;
+
+		for (Method method : Controller.class.getDeclaredMethods())
+			if ((subscription = method.getAnnotation(SubscribeMapping.class)) != null)
+				for (String value : subscription.value())
+					if (sha.getDestination().endsWith(value.replace("{instance}", id)))
+						key = method.getReturnType();
+
+		if (key == null)
+			return;
+
+		SimpMessageHeaderAccessor smha = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		smha.setSessionAttributes(sha.getSessionAttributes());
+		smha.setSubscriptionId(sha.getSubscriptionId());
+		smha.setSessionId(sha.getSessionId());
+
+		SimpMessagingTemplate smt = new SimpMessagingTemplate(channel);
+		smt.setMessageConverter(new MappingJackson2MessageConverter());
+
+		Threading.setCallback(id, key, new Function<Object, MessagingException>() {
 			@Override
-			public Exception apply(RawDraftContentState state) {
+			public MessagingException apply(Object entity) {
 				try {
-					smt.convertAndSend("/syndred/" + instance + "/editor/pull", state, headers);
-				} catch (Exception exception) {
+					smt.convertAndSend(sha.getDestination(), entity, smha.getMessageHeaders());
+				} catch (MessagingException exception) {
 					return exception;
 				}
+
 				return null;
 			}
-		};
+		});
 	}
 
 }

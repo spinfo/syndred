@@ -1,39 +1,33 @@
 package syndred.logic;
 
-import java.util.concurrent.ExecutionException;
-
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 
+import syndred.entities.Editor;
 import syndred.entities.Parser;
-import syndred.entities.RawDraftContentState;
 
 @org.springframework.stereotype.Controller
 public class Controller {
 
-	@SubscribeMapping("/{instance}/editor/pull")
-	public RawDraftContentState editorPull(@DestinationVariable String instance) {
-		return Threading.pull(instance);
+	@SubscribeMapping("/{instance}/editor/get")
+	public Editor getEditor(@DestinationVariable String instance) {
+		return Threading.getEditor(instance);
 	}
 
-	@MessageMapping("/{instance}/editor/push")
-	public void editorPush(@DestinationVariable String instance, RawDraftContentState state)
-			throws InterruptedException {
-		Threading.push(instance, state);
+	@MessageMapping("/{instance}/editor/set")
+	public void setEditor(@DestinationVariable String instance, Editor editor) {
+		Threading.setEditor(instance, editor);
 	}
 
-	@SubscribeMapping("/{instance}/parser/pull")
-	public Parser parserPull(@DestinationVariable String instance) {
-		return Threading.parser(instance);
+	@SubscribeMapping("/{instance}/parser/get")
+	public Parser getParser(@DestinationVariable String instance) {
+		return Threading.getParser(instance);
 	}
 
-	@MessageMapping("/{instance}/parser/push")
-	@SendTo("/syndred/{instance}/parser/pull")
-	public Parser parserPush(@DestinationVariable String instance, Parser parser)
-			throws InterruptedException, ExecutionException {
-		return Threading.run(instance, parser);
+	@MessageMapping("/{instance}/parser/set")
+	public void setParser(@DestinationVariable String instance, Parser parser) {
+		Threading.setParser(instance, parser);
 	}
 
 }

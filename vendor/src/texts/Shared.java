@@ -2,58 +2,47 @@ package texts;
 
 import java.util.List;
 
-import CP.Ebnf.Ebnf;
-import tree.Node;
-import tree.SyntaxTree;
+public final class Shared {
 
-public class Shared {
+	public boolean backTrack = false;
 
-	public boolean backTrack;
+	private Texts text = new Texts();
 
-	public static int maxPosInParse;
-
-	public Texts sharedText;
-
-	public Shared() {
-		backTrack = false;
-		maxPosInParse = -1;
-		sharedText = new Texts();
-	}
-
-	public void setGrammar(List<Character> grammar) {
-		sharedText.setGrammar(grammar);
-	}
-
-	public void setRegex(List<Character> regex) {
-		sharedText.setRegex(regex);
-	}
-
-	public Texts getSharedText() {
-		return sharedText;
+	public synchronized Texts getSharedText() {
+		// System.out.println("~~~~~~~~~~ getSharedText(" +
+		// Thread.currentThread().getId() + "@" + text + ")");
+		return text;
 	}
 
 	public synchronized RichChar getSym() {
+		Texts text = getSharedText();
+
 		try {
-			while (sharedText.getParsePos() == sharedText.getTextLen())
-				Thread.sleep(100);
+			while (!Thread.interrupted() && text.getParsePos() == text.getTextLen()) {
+				System.out.println("~~~~~~~~~~ getSym(" + Thread.currentThread().getId() + ")");
+				Thread.sleep(500);
+			}
 		} catch (InterruptedException e) {
 			return new RichChar('\0');
 		}
 
-		maxPosInParse = -1;
-		SyntaxTree.walker(new Node(), Ebnf.root, null);
-		return sharedText.getRichChar();
+		text.setMaxPos(-1);
+		return text.getRichChar();
 	}
 
-	public boolean errorCase(int position) {
-		maxPosInParse = Math.max(position, sharedText.getParsePos());
+	public synchronized boolean errorCase(int position) {
+		// System.out.println("~~~~~~~~~~ errorCase(" + Thread.currentThread().getId() +
+		// "@" + text + ")");
+		Texts text = getSharedText();
+		List<RichChar> chars = text.getRichChars();
+		text.setMaxPos(Math.max(position, text.getParsePos()));
 
 		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
+			Thread.sleep(500);
+		} catch (InterruptedException expected) {
 		}
 
-		return false;
+		return chars.equals(text.getRichChars());
 	}
 
 }

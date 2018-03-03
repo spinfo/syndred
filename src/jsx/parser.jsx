@@ -5,7 +5,6 @@ export default class Parser extends React.Component {
 
 	get parserMap() {
 		return {
-			abnf: 'Augmented Backus–Naur form (ABNF)',
 			rbnf: 'Rich Backus–Naur form (RBNF)',
 			regex: 'Regular Expressions',
 			test: 'Simple echo test'
@@ -15,7 +14,7 @@ export default class Parser extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.dest = `${window.dest}/parser/`;
+		this.dest = `${window.dest}/parser`;
 		this.state = {
 			name: '',
 			grammar: '',
@@ -25,7 +24,7 @@ export default class Parser extends React.Component {
 	}
 
 	componentDidMount() {
-		this.props.socket.subscribe(`${this.dest}pull`,
+		this.props.socket.subscribe(`${this.dest}/get`,
 			(message) => this.setState(JSON.parse(message.body),
 				() => this.props.run()));
 	}
@@ -33,7 +32,7 @@ export default class Parser extends React.Component {
 	setParser(event) {
 		event.preventDefault();
 		this.props.socket
-			.send(`${this.dest}push`, { }, JSON.stringify(this.state));
+			.send(`${this.dest}/set`, { }, JSON.stringify(this.state));
 	}
 
 	render() {

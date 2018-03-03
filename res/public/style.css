@@ -22,21 +22,11 @@
 	padding: 10px;
 }
 
-.disabled {
+/* .disabled {
+	filter: blur(2.5px);
 	pointer-events: none;
-	position: relative;
-}
-.disabled::before {
-	background-color: rgba(0, 0, 0, 0.25);
-	bottom: 0;
-	content: '';
-	display: block;
-	left: 0;
-	position: absolute;
-	right: 0;
-	top: 0;
-	z-index: 5;
-}
+	transition: 100ms;
+} */
 
 .editor-menu {
 	margin-bottom: 25px;

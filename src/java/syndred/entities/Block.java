@@ -25,7 +25,7 @@ public class Block implements Serializable {
 	private Integer depth;
 
 	@JsonProperty("inlineStyleRanges")
-	private List<InlineStyleRange> inlineStyleRanges = null;
+	private List<Range> inlineStyleRanges = null;
 
 	@JsonProperty("entityRanges")
 	private List<Object> entityRanges = null;
@@ -76,12 +76,12 @@ public class Block implements Serializable {
 	}
 
 	@JsonProperty("inlineStyleRanges")
-	public List<InlineStyleRange> getInlineStyleRanges() {
+	public List<Range> getInlineStyleRanges() {
 		return inlineStyleRanges;
 	}
 
 	@JsonProperty("inlineStyleRanges")
-	public void setInlineStyleRanges(List<InlineStyleRange> inlineStyleRanges) {
+	public void setInlineStyleRanges(List<Range> inlineStyleRanges) {
 		this.inlineStyleRanges = inlineStyleRanges;
 	}
 

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "parseTree", "entityMap", "blocks" })
-public class RawDraftContentState implements Serializable {
+public class Editor implements Serializable {
 
 	@JsonProperty("parseTree")
 	private String parseTree;

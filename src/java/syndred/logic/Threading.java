@@ -1,117 +1,98 @@
 package syndred.logic;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Function;
 
+import org.springframework.messaging.MessagingException;
+
+import syndred.entities.Editor;
 import syndred.entities.Parser;
-import syndred.entities.RawDraftContentState;
 import syndred.tasks.EchoTask;
 import syndred.tasks.RbnfTask;
 import syndred.tasks.RegexTask;
 
 public class Threading {
 
-	private static ExecutorService executorService = Executors.newCachedThreadPool();
-	private static Map<String, Future<Parser>> futures = new HashMap<String, Future<Parser>>();
-	private static Map<String, BlockingQueue<RawDraftContentState>> input = new HashMap<String, BlockingQueue<RawDraftContentState>>();
-	private static Map<String, Function<RawDraftContentState, Exception>> output = new HashMap<String, Function<RawDraftContentState, Exception>>();
-	private static Map<String, Parser> parsers = new HashMap<String, Parser>();
-	private static Map<String, RawDraftContentState> states = new HashMap<String, RawDraftContentState>();
+	private static ExecutorService executor = Executors.newCachedThreadPool();
 
-	public static void callback(String instence, Function<RawDraftContentState, Exception> callback) {
-		output.put(instence, new Function<RawDraftContentState, Exception>() {
+	private static ConcurrentMap<String, Instance> instances = new ConcurrentHashMap<String, Instance>();
+
+	public static void connect(String id) {
+		if (!instances.containsKey(id))
+			instances.put(id, new Instance());
+	}
+
+	public static void disconnect(String id) {
+		instances.remove(id).close();
+	}
+
+	public static void setCallback(String id, Class<?> key, Function<Object, MessagingException> callback) {
+		instances.get(id).pipes.put(key, new Function<Object, MessagingException>() {
 			@Override
-			public Exception apply(RawDraftContentState state) {
-				states.put(instence, state);
-				return callback.apply(state);
+			public MessagingException apply(Object entity) {
+				instances.get(id).values.put(entity.getClass(), entity);
+				return callback.apply(entity);
 			}
 		});
 	}
 
-	public static void connect(String instance) {
-		if (!connected(instance)) {
-			input.put(instance, new LinkedBlockingQueue<RawDraftContentState>(1));
-			parsers.put(instance, new Parser());
-			states.put(instance, new RawDraftContentState());
-		}
+	public static Editor getEditor(String id) {
+		return instances.get(id).value(Editor.class);
 	}
 
-	public static boolean connected(String instance) {
-		return states.containsKey(instance);
+	public static void setEditor(String id, Editor editor) {
+		instances.get(id).enqueue(editor);
 	}
 
-	public static void disconnect(String instance) {
-		Future<Parser> future = futures.remove(instance);
-
-		if (future != null && !future.isCancelled())
-			future.cancel(true);
-
-		input.remove(instance);
-		output.remove(instance);
-		parsers.remove(instance);
-		states.remove(instance);
+	public static Parser getParser(String id) {
+		return instances.get(id).value(Parser.class);
 	}
 
-	public static RawDraftContentState pull(String instance) {
-		return states.get(instance);
-	}
-
-	public static void push(String instance, RawDraftContentState state) throws InterruptedException {
-		input.get(instance).put(state);
-	}
-
-	public static Parser parser(String instance) {
-		return parsers.get(instance);
-	}
-
-	public static Parser run(String instance, Parser parser) throws InterruptedException, ExecutionException {
-		Future<Parser> future = futures.get(instance);
-
-		if (future != null && !future.isCancelled())
-			future.cancel(true);
+	public static void setParser(String id, Parser parser) {
+		Instance instance = instances.get(id);
 
 		parser.setError("");
 		parser.setRunning(false);
 
+		instance.close();
+		instance.pipe(parser);
+
 		try {
 			switch (parser.getName()) {
-			// case "abnf":
-			// future = executorService.submit(new AbnfTask(input.get(instance),
-			// output.get(instance), parser));
-			// break;
-
 			case "rbnf":
-				future = executorService.submit(new RbnfTask(input.get(instance), output.get(instance), parser));
+				instance.future = executor.submit(new RbnfTask(instance));
 				break;
 
 			case "regex":
-				future = executorService.submit(new RegexTask(input.get(instance), output.get(instance), parser));
+				instance.future = executor.submit(new RegexTask(instance));
 				break;
 
 			case "test":
-				future = executorService.submit(new EchoTask(input.get(instance), output.get(instance), parser));
+				instance.future = executor.submit(new EchoTask(instance));
 				break;
 
 			default:
-				parser.setError("Parser not implemented");
-				return parser;
+				throw new ClassNotFoundException("Parser not implemented");
 			}
-		} catch (ExecutionException error) {
-			parser.setError(error.getMessage());
-			return parser;
+		} catch (Throwable thrown) {
+			parser.setError(thrown.getMessage());
+		} finally {
+			parser.setRunning(instance.active());
+			instance.pipe(parser);
 		}
 
-		parser.setRunning(true);
-		futures.put(instance, future);
-		parsers.put(instance, parser);
-		return parser;
+		// try {
+		// instance.pipe(Parser.class).apply(instance.future.get());
+		// } catch (CancellationException expected) {
+		// } catch (InterruptedException expected) {
+		// } catch (Throwable thrown) {
+		// parser.setError(thrown.getMessage());
+		// parser.setRunning(instance.active());
+		// instance.pipe(Parser.class).apply(parser);
+		// }
 	}
 
 }

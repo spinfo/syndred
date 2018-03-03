@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "offset", "length", "style" })
-public class InlineStyleRange implements Serializable {
+public class Range implements Serializable {
 
 	@JsonProperty("offset")
 	private Integer offset;

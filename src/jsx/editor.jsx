@@ -58,10 +58,9 @@ export default class Editor extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.dest = `${window.dest}/editor/`;
+		this.dest = `${window.dest}/editor`;
 		this.parse = debounce(this.parse, 500);
 		this.state = {
-			bounds: null,
 			editor: Draft.EditorState.createEmpty(),
 			fullscreen: false,
 			treeData: null,
@@ -75,26 +74,24 @@ export default class Editor extends React.Component {
 		screenfull.onchange(
 			() => this.setState({ fullscreen: screenfull.isFullscreen }));
 
-		this.props.socket.subscribe(`${this.dest}pull`,
-			(message) => {
-				let data = JSON.parse(message.body);
-				if (Object.getOwnPropertyNames(data).length == 0) return;
+		this.props.socket.subscribe(`${this.dest}/get`, (message) => {
+			let data = JSON.parse(message.body);
+			if (Object.getOwnPropertyNames(data).length == 0) return;
 
-				let cursor = this.state.editor.getSelection();
-				let editor = Draft.EditorState
-					.push(this.state.editor, Draft.convertFromRaw(data));
+			let cursor = this.state.editor.getSelection();
+			let editor = Draft.EditorState
+				.push(this.state.editor, Draft.convertFromRaw(data));
 
-				if (cursor.getHasFocus())
-					editor = Draft.EditorState.forceSelection(editor, cursor);
+			if (cursor.getHasFocus())
+				editor = Draft.EditorState.forceSelection(editor, cursor);
 
-				console.log('parseTree', data.parseTree);
-				let treeData = data.parseTree
-					? JSON.parse(data.parseTree) : null;
+			let treeData = data.parseTree ? JSON.parse(data.parseTree) : null;
 
-				this.setState({ editor, treeData, treeView: false },
-					() => this.screen.classList.remove('disabled'));
-			}
-		);
+			this.setState({ editor, treeData, treeView: false }, () => {
+				// this.editor.editor.contentEditable = true;
+				this.screen.classList.remove('disabled');
+			});
+		});
 	}
 
     componentWillUnmount() {
@@ -117,7 +114,8 @@ export default class Editor extends React.Component {
 		let data = Draft.convertToRaw(this.state.editor.getCurrentContent());
 
 		this.screen.classList.add('disabled');
-		this.props.socket.send(`${this.dest}push`, { }, JSON.stringify(data));
+		// this.editor.editor.contentEditable = false;
+		this.props.socket.send(`${this.dest}/set`, { }, JSON.stringify(data));
 	}
 
 	range(name, map) {

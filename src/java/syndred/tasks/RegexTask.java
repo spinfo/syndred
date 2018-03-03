@@ -1,50 +1,38 @@
 package syndred.tasks;
 
-import java.text.ParseException;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+import syndred.entities.Editor;
 import syndred.entities.Parser;
-import syndred.entities.RawDraftContentState;
 import syndred.logic.DraftState;
+import syndred.logic.Instance;
 
 public class RegexTask extends Task {
 
 	Pattern pattern;
 
-	public RegexTask(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
-			Parser parser) throws ExecutionException {
-		super(input, output, parser);
+	public RegexTask(Instance instance) throws ExecutionException {
+		super(instance);
 
 		try {
-			pattern = Pattern.compile(parser.getGrammar());
+			pattern = Pattern.compile(instance.value(Parser.class).getGrammar());
 		} catch (Throwable thrown) {
 			throw new ExecutionException(thrown);
 		}
+
+		initialized = true;
 	}
 
 	@Override
-	public void close() throws Exception {
-	}
+	protected Editor parse(Editor editor) throws Exception {
+		Matcher matcher = pattern.matcher(DraftState.getString(editor));
 
-	@Override
-	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
-		DraftState.del(state, "Success");
-		Matcher matcher = pattern
-				.matcher(state.getBlocks().stream().map(i -> i.getText()).collect(Collectors.joining()));
+		while (matcher.find())
+			DraftState.addRange(editor, "Success", matcher.start(), matcher.end() - matcher.start());
 
-		try {
-			while (matcher.find())
-				DraftState.add(state, "Success", matcher.start(), matcher.end() - matcher.start());
-		} catch (Throwable thrown) {
-			throw new ParseException(thrown.getMessage(), matcher.start());
-		}
-
-		return state;
+		return editor;
 	}
 
 }

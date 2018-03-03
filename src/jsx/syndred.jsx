@@ -12,27 +12,33 @@ class Syndred extends React.Component {
 		super(props);
 
 		this.state = {
-			ready: false,
-			socket: Stomp.over(new SockJS('/websocket'))
+			ready: false
 		};
-		this.state.socket.debug = null;
 	}
 
 	componentDidMount() {
 		window.setTimeout(() => this.componentDidMount(), 2500);
 
-		if (!this.state.ready)
-			this.state.socket.connect({ instance: location.hash },
+		if (!this.socket) {
+			this.socket = Stomp.over(new SockJS('/websocket'));
+			this.socket.debug = () => null;
+		}
+
+		if (!this.state.ready) {
+			this.socket.connect({ id: location.hash },
 				() => this.setState({ ready: true }),
 				() => this.setState({ ready: false }));
+		}
 	}
 
 	componentWillMount() {
-		if (!location.hash)
-			location.hash = Math.random().toString(36).substring(2);
-
-		window.dest = '/syndred/' + location.hash;
+		window.dest = '/syndred/' + window.location.hash;
 		window.onhashchange = () => window.location.reload();
+
+		if (!window.location.hash) {
+			this.componentDidMount = null;
+			window.location.hash = Math.random().toString(36).substring(2);
+		}
 	}
 
 	render() {
@@ -41,13 +47,13 @@ class Syndred extends React.Component {
 				<div className='col-md-5'>
 					<Parser
 						run={() => this.editor.parse()}
-						socket={this.state.socket}
+						socket={this.socket}
 					/>
 				</div>
 				<div className='col-md-7'>
 					<Editor
 						ref={(ref) => this.editor = ref}
-						socket={this.state.socket}
+						socket={this.socket}
 					/>
 				</div>
 			</div>

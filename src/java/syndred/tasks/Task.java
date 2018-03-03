@@ -1,52 +1,56 @@
 package syndred.tasks;
 
-import java.text.ParseException;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
+import syndred.entities.Editor;
 import syndred.entities.Parser;
-import syndred.entities.RawDraftContentState;
+import syndred.logic.DraftState;
+import syndred.logic.Instance;
 
 public abstract class Task implements AutoCloseable, Callable<Parser> {
 
-	private final BlockingQueue<RawDraftContentState> input;
+	protected abstract Editor parse(Editor editor) throws Exception;
 
-	private final Function<RawDraftContentState, Exception> output;
+	protected final Instance instance;
 
-	private final Parser parser;
+	protected boolean initialized;
 
-	abstract protected RawDraftContentState parse(RawDraftContentState state) throws ParseException;
+	protected Thread thread;
 
-	public Task(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
-			Parser parser) throws ExecutionException {
-		this.input = input;
-		this.output = output;
-		this.parser = parser;
+	public Task(Instance instance) throws ExecutionException {
+		this.instance = instance;
 	}
 
 	@Override
 	public Parser call() {
-		while (!Thread.interrupted()) {
-			try {
-				Exception error = output.apply(parse(input.take()));
-				if (error != null)
-					throw error;
-			} catch (Throwable thrown) {
-				parser.setError(thrown.getMessage());
-				break;
-			}
-		}
+		Editor editor = instance.value(Editor.class);
+		Parser parser = instance.value(Parser.class);
+		thread = Thread.currentThread();
 
-		try {
-			this.close();
+		try (Task task = this) {
+			while (!initialized)
+				Thread.sleep(100);
+
+			while (!thread.isInterrupted()) {
+				System.out.println("-----> TASK TAKE(" + Thread.currentThread().getId() + ")");
+				editor = instance.input.take();
+				DraftState.deleteRange(editor, "Error");
+				DraftState.deleteRange(editor, "Success");
+				instance.pipe(parse(editor));
+			}
+		} catch (InterruptedException expected) {
 		} catch (Throwable thrown) {
 			parser.setError(thrown.getMessage());
 		}
 
-		parser.setRunning(false);
+		System.out.println("-----> TASK END(" + Thread.currentThread().getId() + ")");
+
 		return parser;
+	}
+
+	@Override
+	public void close() throws Exception {
 	}
 
 }

@@ -1,55 +1,66 @@
 package syndred.tasks;
 
-import java.text.ParseException;
-import java.util.LinkedList;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import CP.Ebnf.Ebnf;
-import syndred.entities.Block;
-import syndred.entities.InlineStyleRange;
+import syndred.entities.Editor;
 import syndred.entities.Parser;
-import syndred.entities.RawDraftContentState;
 import syndred.logic.DraftState;
+import syndred.logic.Instance;
 import texts.RichChar;
 import texts.Shared;
 import texts.Texts;
-import tree.Node;
+import tree.TreeNode;
 
 public class RbnfTask extends Task {
 
 	private Thread ebnf;
 
+	private TreeNode root;
+
 	private Shared shared;
 
-	private boolean success;
+	public RbnfTask(Instance instance) throws ExecutionException {
+		super(instance);
 
-	public RbnfTask(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
-			Parser parser) throws ExecutionException {
-		super(input, output, parser);
+		String grammar = instance.value(Parser.class).getGrammar();
+		List<Character> list = grammar.chars().mapToObj(i -> (char) i).collect(Collectors.toList());
+		UncaughtExceptionHandler threadHandler = new UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread thrower, Throwable thrown) {
+				Parser parser = instance.value(Parser.class);
+				parser.setError(thrown.getClass().getName() + ": " + thrown.getMessage());
+				parser.setRunning(false);
+				instance.pipe(parser);
+				thread.interrupt();
+			}
+		};
 
 		ebnf = new Thread(() -> {
-			while (!Thread.interrupted()) {
-				try {
-					Ebnf.root = Ebnf.syntaxDrivenParse();
-					success = true;
+			shared = new Shared();
+			shared.getSharedText().setGrammar(list);
 
-					while (success)
+			try {
+				initialized = Ebnf.init(shared);
+
+				while (!ebnf.isInterrupted()) {
+					root = Ebnf.syntaxDrivenParse();
+
+					System.out.println("========== SUCCESS(" + Thread.currentThread().getId() + ")");
+
+					while (initialized)
 						Thread.sleep(100);
-				} catch (Throwable thrown) {
 				}
+			} catch (Throwable thrown) {
+				threadHandler.uncaughtException(ebnf, thrown);
 			}
 		});
 
-		shared = new Shared();
-		shared.setGrammar(parser.getGrammar().chars().mapToObj(i -> (char) i).collect(Collectors.toList()));
-		shared.setRegex("\\u00FC:\n\\u00FD:".chars().mapToObj(i -> (char) i).collect(Collectors.toList()));
-
 		try {
-			Ebnf.init(shared);
+			ebnf.setUncaughtExceptionHandler(threadHandler);
 			ebnf.start();
 		} catch (Throwable thrown) {
 			throw new ExecutionException(thrown);
@@ -57,79 +68,47 @@ public class RbnfTask extends Task {
 	}
 
 	@Override
-	public void close() {
-		while (!ebnf.isInterrupted() || ebnf.isAlive())
-			ebnf.interrupt();
+	@SuppressWarnings("deprecation")
+	public void close() throws Exception {
+		System.out.println("!!!!!!!!!! CLOSE CALLED(" + Thread.currentThread().getId() + ")");
+		while (ebnf.isAlive())
+			ebnf.stop();
 	}
 
 	@Override
-	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
-		DraftState.del(state, "Error");
-		DraftState.del(state, "Success");
-
-		Texts sharedText = shared.getSharedText();
-		List<RichChar> next = getRichChars(state);
-		List<RichChar> prev = sharedText.getRichChars();
+	protected Editor parse(Editor editor) throws Exception {
 		int position = 0;
+		Texts text = shared.getSharedText();
+		List<RichChar> next = DraftState.getRichChars(editor);
+		List<RichChar> prev = text.getRichChars();
 
 		try {
 			while (next.get(position).equals(prev.get(position)))
 				position++;
-		} catch (IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException expected) {
 		}
 
-		Shared.maxPosInParse = -1;
-		sharedText.setParsePos(0);
-		sharedText.setRichChars(next);
-		success = false;
+		initialized = false;
+		text.setMaxPos(-1);
+		text.setParsePos(/* position */ 0);
+		text.setRichChars(next);
 
 		try {
-			while (!success && Shared.maxPosInParse < 0 && sharedText.getParsePos() < sharedText.getTextLen())
-				Thread.sleep(100);
-		} catch (InterruptedException e) {
-			return state;
-		}
-
-		if (Shared.maxPosInParse >= 0)
-			DraftState.add(state, "Error", Shared.maxPosInParse, next.size() - Shared.maxPosInParse);
-		else if (success)
-			DraftState.add(state, "Success", 0, next.size());
-
-		state.setParseTree(Node.resultString);
-		return state;
-	}
-
-	private List<RichChar> getRichChars(RawDraftContentState state) {
-		List<RichChar> chars = new LinkedList<RichChar>();
-
-		for (Block block : state.getBlocks()) {
-			String text = block.getText();
-
-			for (int i = 0; i < text.length(); i++) {
-				RichChar rch = new RichChar(text.charAt(i));
-
-				for (InlineStyleRange range : block.getInlineStyleRanges()) {
-					if (range.getOffset() > i || range.getOffset() + range.getLength() <= i)
-						continue;
-
-					char[] style = range.getStyle().toCharArray();
-
-					switch (range.getStyle()) {
-					case "Bold":
-						rch.weight = style;
-						break;
-
-					case "Italic":
-					case "Underline":
-						rch.style = style;
-						break;
-					}
-				}
-
-				chars.add(rch);
+			while (!initialized && text.idle()) {
+				System.out.println("========== parse(" + Thread.currentThread().getId() + "): sleep");
+				Thread.sleep(500);
 			}
+		} catch (InterruptedException expected) {
+			return editor;
 		}
 
-		return chars;
+		if (text.getMaxPos() >= 0)
+			DraftState.addRange(editor, "Error", text.getMaxPos(), next.size() - text.getMaxPos());
+		else if (initialized)
+			DraftState.addRange(editor, "Success", 0, next.size());
+
+		editor.setParseTree("");
+		return editor;
 	}
+
 }

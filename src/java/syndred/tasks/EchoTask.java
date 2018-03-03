@@ -1,27 +1,20 @@
 package syndred.tasks;
 
-import java.text.ParseException;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
-import syndred.entities.Parser;
-import syndred.entities.RawDraftContentState;
+import syndred.entities.Editor;
+import syndred.logic.Instance;
 
 public class EchoTask extends Task {
 
-	public EchoTask(BlockingQueue<RawDraftContentState> input, Function<RawDraftContentState, Exception> output,
-			Parser parser) throws ExecutionException {
-		super(input, output, parser);
+	public EchoTask(Instance instance) throws ExecutionException {
+		super(instance);
+		initialized = true;
 	}
 
 	@Override
-	public void close() throws Exception {
-	}
-
-	@Override
-	protected RawDraftContentState parse(RawDraftContentState state) throws ParseException {
-		return state;
+	protected Editor parse(Editor editor) throws Exception {
+		return editor;
 	}
 
 }
